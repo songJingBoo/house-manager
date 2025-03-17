@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.song.demo.mapper.HouseMapper">
+
+    <select id="getHouse" resultType="com.song.demo.vo.HouseVo">
+        select
+            h.*,
+            u.username as agent_name,
+            u.phone as agent_phone
+        from houses h
+            left join users u on h.agent = u.user_id
+        <where>
+            <if test="query.status != null and query.status != ''">
+                and h.status = #{query.status}
+            </if>
+            <if test="query.layout != null and query.layout != ''">
+                and h.layout = #{query.layout}
+            </if>
+            <if test="query.city != null and query.city != ''">
+                and h.city = #{query.city}
+            </if>
+            <if test="query.community != null and query.community != ''">
+                and h.community like concat('%', #{query.community}, '%')
+            </if>
+            <if test="query.name != null and query.name != ''">
+                and h.name like concat('%', #{query.name}, '%')
+            </if>
+            <if test="query.phone != null and query.phone != ''">
+                and h.phone = #{query.phone}
+            </if>
+        </where>
+        order by h.create_time desc
+    </select>
+
+
+    <select id="getHouseById" resultType="com.song.demo.vo.HouseVo">
+        select
+            h.*,
+            u.username as agent_name,
+            u.phone as agent_phone
+        from houses h
+        left join users u on h.agent = u.user_id
+        where h.house_id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,30 @@
+server:
+  port: 8099
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    hikari:
+#      auto-commit: false
+    url: jdbc:mysql://localhost:3306/house
+    username: root
+    password: zsxdc153
+  servlet:
+    sesssion:
+      timeout: 1800
+  redis:
+    host: localhost
+    port: 6379
+#    password: zsxdc153  @todo 密码设置了但连接不上
+  session:
+    store-type: redis
+    timeout: 60s  # 1分钟过期
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml  #注意：一定要对应mapper映射xml文件的所在路径
+
+#spring:
+#  mvc:
+#    throw-exception-if-no-handler-found: true
+#  resource:
+#    add-mappings: false

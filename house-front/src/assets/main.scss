@@ -1,0 +1,93 @@
+@import url('./reset.scss');
+@import url('./them.scss');
+
+.cursor {
+  cursor: pointer;
+}
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.common-page {
+  width: 1174px;
+  margin: 0 auto;
+}
+
+// 通用分页
+.common-table {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .common-table__table {
+    flex-grow: 1;
+  }
+  .common-table__pager {
+    padding: 10px;
+    padding-bottom: 0;
+  }
+}
+
+.cursor {
+  cursor: pointer;
+}
+
+// 弹窗
+.common-dialog-content {
+  padding: 0 30px;
+}
+
+.el-tabs {
+  .el-tabs__nav-wrap:after {
+    background-color: var(--theme-color);
+  }
+  .el-tabs__active-bar {
+    background-color: var(--theme-color);
+  }
+  .el-tabs__item:hover,
+  .el-tabs__item.is-active {
+    color: var(--theme-color);
+  }
+}
+
+.el-radio {
+  .el-radio__input.is-checked .el-radio__inner {
+    background: var(--theme-color);
+    border-color: var(--theme-color);
+  }
+  .el-radio__input.is-checked + .el-radio__label {
+    color: var(--theme-color);
+  }
+  .el-radio__inner:hover {
+    border-color: var(--theme-color);
+  }
+}
+
+.el-button {
+  &.el-button--primary {
+    background-color: var(--theme-color);
+    border-color: var(--theme-color);
+  }
+  &:hover {
+    background-color: var(--btn-hover) !important;
+    border-color: var(--btn-hover) !important;
+  }
+}
+
+// 客户端按钮
+.client-page-content {
+  .el-button {
+    border-radius: 0 !important;
+  }
+}
+
+// 覆盖浏览器元素悬停样式
+:focus-visible {
+  outline: none !important;
+}
+
+.text-over {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
