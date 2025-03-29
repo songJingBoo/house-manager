@@ -1,18 +1,107 @@
-<script setup>
-// import { useRouter } from 'vue-router'
-// import { login } from '@/api/login'
-// import md5 from 'md5'
-// import { Avatar, Flag } from '@element-plus/icons-vue'
-// import { useInfoStore } from '@/stores/userInfo'
-// const store = useInfoStore()
-// const router = useRouter()
-</script>
-
 <template>
-  <div class="house-page">house</div>
+  <BasePage title="House Manager">
+    <template #header>
+      <el-tabs v-model="search.status" class="demo-tabs" @tab-click="getListFn()">
+        <el-tab-pane label="Available" name="AVAILABLE" />
+        <el-tab-pane label="Rented" name="RENTED" />
+        <el-tab-pane label="Sold" name="SOLD" />
+      </el-tabs>
+      <el-form :inline="true" :model="search" class="demo-form-inline">
+        <el-form-item label="City" prop="city">
+          <el-select v-model="search.city" placeholder="Select" style="width: 120px">
+            <el-option v-for="item in cityList" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Phone" prop="phone">
+          <el-input v-model="search.phone" placeholder="Enter phone" clearable />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="getListFn">Search</el-button>
+        </el-form-item>
+      </el-form>
+    </template>
+
+    <div class="common-table">
+      <el-table v-loading="loading" class="common-table__table" :data="tableData" style="width: 100%">
+        <el-table-column label="Layout" prop="layoutTxt" width="180" />
+        <el-table-column label="Area" prop="areaTxt" width="180" />
+        <el-table-column label="Expected price" prop="expectPriceTxt" width="180" />
+        <el-table-column label="Floor" prop="floor" width="180" />
+        <el-table-column label="City" prop="city" width="180" />
+        <el-table-column label="Community" prop="community" width="180" />
+        <el-table-column label="Address" prop="address" width="180" />
+        <el-table-column label="Name" prop="name" width="180" />
+        <el-table-column label="Phone" prop="phone" width="180" />
+        <el-table-column label="Publish Time" prop="createTime" width="180" />
+        <el-table-column label="operate" prop="Operate" fixed="right" width="180">
+          <template #default="scope">
+            <el-button type="primary" small @click="editFn(scope.row)">Edit</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-pagination class="common-table__pager" background layout="total, prev, pager, next" :page-size="20" :total="page.total" />
+    </div>
+
+    <!-- 信息修改 -->
+    <EditDialog ref="editRef" @submit="getListFn" />
+  </BasePage>
 </template>
 
-<style lang="scss" scoped>
-.house-page {
+<script setup>
+import { ref, onMounted, useTemplateRef } from 'vue'
+import BasePage from '@/components/back/Base-page.vue'
+import EditDialog from './audit/edit-dialog.vue'
+import { queryHouseList } from '@/api/back/house-manage'
+import { cityList } from '@/config/city'
+
+onMounted(() => {
+  getListFn()
+})
+
+const search = ref({
+  status: 'AVAILABLE',
+  city: '',
+  phone: '',
+})
+const page = ref({
+  pageNum: 1,
+  total: 0,
+})
+
+// 查询房屋
+const loading = ref(false)
+const tableData = ref([])
+async function getListFn(isInit = true) {
+  if (isInit) {
+    page.value.pageNum = 1
+  }
+
+  try {
+    loading.value = true
+    const res = await queryHouseList(search.value)
+    if (res.status === 200) {
+      tableData.value = (res.data || []).map((item) => {
+        return {
+          ...item,
+          layoutTxt: `${item.layout.toLowerCase()}-bedroom`,
+          areaTxt: `${item.area}㎡`,
+          expectPriceTxt: `${item.area}￥10k`,
+        }
+      })
+    }
+  } catch (e) {
+    console.log(e)
+  } finally {
+    loading.value = false
+  }
 }
-</style>
+
+// 打开新增/编辑弹窗
+const editRef = useTemplateRef('editRef')
+function editFn(data) {
+  editRef.value.open(data)
+}
+</script>
+
+<style lang="scss" scoped></style>

@@ -2,8 +2,8 @@
   <BasePage title="Administrators">
     <template #header>
       <el-form :inline="true" :model="search" class="demo-form-inline">
-        <el-form-item label="Username">
-          <el-input v-model="search.username" placeholder="Enter username" clearable />
+        <el-form-item label="Keyword">
+          <el-input v-model="search.keyword" placeholder="Enter username/phone" clearable />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="getListFn">Search</el-button>
@@ -16,14 +16,10 @@
     </template>
 
     <div class="common-table">
-      <el-table
-        v-loading="loading"
-        class="common-table__table"
-        :data="tableData"
-        style="width: 100%"
-      >
+      <el-table v-loading="loading" class="common-table__table" :data="tableData" style="width: 100%">
         <el-table-column prop="username" label="Username" width="180" />
         <el-table-column prop="phone" label="Phone" width="180" />
+        <el-table-column prop="role" label="Role" width="180" />
         <el-table-column prop="createTime" label="Create Time" />
         <el-table-column prop="updateTime" label="Update Time" />
         <el-table-column prop="operate" label="Operate">
@@ -34,13 +30,7 @@
         </el-table-column>
       </el-table>
 
-      <el-pagination
-        class="common-table__pager"
-        background
-        layout="total, prev, pager, next"
-        :page-size="20"
-        :total="page.total"
-      />
+      <el-pagination class="common-table__pager" background layout="total, prev, pager, next" :page-size="20" :total="page.total" />
     </div>
 
     <!-- 新增/修改 -->
@@ -60,7 +50,7 @@ onMounted(() => {
 })
 
 const search = ref({
-  username: '',
+  keyword: '',
 })
 const page = ref({
   pageNum: 1,
@@ -78,10 +68,10 @@ async function getListFn(isInit = true) {
   try {
     loading.value = true
     const res = await queryManagerList(search.value)
-    if (res.success) {
-      const { records = [], total = 0 } = res.data || {}
-      tableData.value = records
-      page.value.total = total
+    if (res.status === 200) {
+      // const { records = [], total = 0 } = res.data || {}
+      tableData.value = res.data || []
+      // page.value.total = total
     }
   } catch (e) {
     console.log(e)

@@ -10,6 +10,7 @@ import java.util.Date;
 public class LoginVo {
     private String username;
     private String userId;
+    private String role;
     private String token;
     private Date expirationTime;
 }

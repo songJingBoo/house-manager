@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
 // 获取管理员列表
-export function queryManagerList(data) {
+export function queryManagerList(params) {
   return request({
     url: '/back/manager/list',
-    method: 'post',
-    data,
+    method: 'get',
+    params,
   })
 }
 

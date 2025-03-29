@@ -52,7 +52,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> {
             CustomUserDetails userDetail = (CustomUserDetails) authentication.getPrincipal();
             redisService.set(userDetail.getUsername(), userDetail);
             // 4 生成自定义token
-            return JwtUtils.createToken(loginDto.getUsername(), userDetail.getUserId());
+            return JwtUtils.createToken(loginDto.getUsername(), userDetail.getUserId(), userDetail.getRole());
         } catch (Exception e) {
             throw new BizException("用户名或密码错误");
         }
@@ -80,7 +80,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> {
         userPo.setUsername(userDto.getUsername());
         userPo.setPassword(finalPassword);
 //        userPo.setPhone(userDto.getPhone());
-        userPo.setRole(RoleEn.Customer);
+        userPo.setRole(RoleEn.CUSTOMER.getRole());
         userPo.setCreator("SELF");
         int result = userMapper.insert(userPo);
         return result == 1;

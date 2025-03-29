@@ -6,9 +6,11 @@
         select
             h.*,
             u.username as agent_name,
-            u.phone as agent_phone
+            u.phone as agent_phone,
+            GROUP_CONCAT(hi.image_url) as images
         from houses h
             left join users u on h.agent = u.user_id
+            left join house_images hi on h.house_id = hi.house_id
         <where>
             <if test="query.status != null and query.status != ''">
                 and h.status = #{query.status}
@@ -29,6 +31,7 @@
                 and h.phone = #{query.phone}
             </if>
         </where>
+        group by h.house_id
         order by h.create_time desc
     </select>
 

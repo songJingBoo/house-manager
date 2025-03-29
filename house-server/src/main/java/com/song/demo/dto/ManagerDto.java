@@ -11,7 +11,7 @@ import java.io.Serializable;
  * 用户新增、修改实体类
  */
 @Data
-public class UserDto implements Serializable {
+public class ManagerDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,6 @@ public class UserDto implements Serializable {
     /**
      * 密码
      */
-    @NotEmpty(message = "密码不能为空")
     private String password;
 
     /**

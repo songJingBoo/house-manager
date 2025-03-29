@@ -23,7 +23,7 @@ public class JwtUtils {
      */
     private static final String KEY = "song!@#123";
 
-    public static LoginVo createToken(String username, String userId) {
+    public static LoginVo createToken(String username, String userId, String role) {
         // 当前时间
         final Date now = new Date();
         // 过期时间
@@ -41,7 +41,7 @@ public class JwtUtils {
                 .signWith(SignatureAlgorithm.HS512, KEY)
                 .compact();
 
-        return LoginVo.builder().username(username).userId(userId).token(token).expirationTime(expirationDate).build();
+        return LoginVo.builder().username(username).userId(userId).role(role).token(token).expirationTime(expirationDate).build();
     }
 
     /**

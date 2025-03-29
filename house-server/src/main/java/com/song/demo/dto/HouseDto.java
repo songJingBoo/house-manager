@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 创建房源 操作
@@ -25,6 +26,8 @@ public class HouseDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private long id;
+
+    private String houseId;
 
     @NotNull(message = "户型不能为空")
     @Enumerated(EnumType.STRING)
@@ -58,4 +61,7 @@ public class HouseDto implements Serializable {
     @NotNull(message = "交易类型不能为空")
     @Enumerated(EnumType.STRING)
     private IntentionEn intention;
+
+    @NotNull(message = "房屋图片不能为空")
+    private List<String> files;
 }

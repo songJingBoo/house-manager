@@ -8,12 +8,14 @@ import java.util.Collection;
 public class CustomUserDetails implements UserDetails {
     private final String userId;
     private final String username;
+    private final String role;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(String userId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(String userId, String username, String role, String password, Collection<? extends GrantedAuthority> authorities) {
         this.userId = userId;
         this.username = username;
+        this.role = role;
         this.password = password;
         this.authorities = authorities;
     }
@@ -57,5 +59,9 @@ public class CustomUserDetails implements UserDetails {
 
     public String getUserId() {
         return userId;
+    }
+
+    public String getRole() {
+        return role;
     }
 }

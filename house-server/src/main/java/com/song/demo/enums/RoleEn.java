@@ -7,13 +7,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum RoleEn {
 
-    Customer("客户"),
+    CUSTOMER("Customer", "客户"),
 
-    Agent("经纪人"),
+    AGENT("Agent", "经纪人"),
 
-    Reviewer("审核员"),
+    REVIEWER("Reviewer", "审核员"),
 
-    Admin("系统管理员");
+    ADMIN("Admin", "系统管理员");
+
+    private String role;
 
     private String description;
 }

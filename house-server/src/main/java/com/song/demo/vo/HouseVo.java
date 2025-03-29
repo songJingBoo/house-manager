@@ -12,6 +12,7 @@ import javax.persistence.Enumerated;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class HouseVo implements Serializable {
@@ -54,6 +55,8 @@ public class HouseVo implements Serializable {
     private String agentName;
 
     private String agentPhone;
+
+    private String images;
 
     private String creator;
 

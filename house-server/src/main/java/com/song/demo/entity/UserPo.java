@@ -28,8 +28,8 @@ public class UserPo implements Serializable {
 
     private String phone;
 
-    @Enumerated(EnumType.STRING)
-    private RoleEn role;
+//    @Enumerated(EnumType.STRING)
+    private String role;
 
     /**
      * 是否系统预置（0、1）

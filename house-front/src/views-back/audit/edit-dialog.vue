@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="visible" title="Edit Property" width="500" :before-close="cancel">
-    <div class="common-dialog-content">
+    <div class="common-dialog-content" style="max-height: 520px; overflow-y: auto">
       <el-form ref="publishFormRef" class="publish-page__form" :model="formData" :rules="rules" label-width="auto" style="max-width: 600px">
         <el-form-item label="City" prop="city">
           <el-select v-model="formData.city" placeholder="Select">
@@ -46,6 +46,24 @@
         <el-form-item label="Phone" prop="phone">
           <el-input v-model="formData.phone" type="number" />
         </el-form-item>
+        <el-form-item label="Files">
+          <el-upload
+            ref="uploadRef"
+            action="/api/file/upload"
+            :multiple="true"
+            :show-file-list="true"
+            :on-success="handleUploadSuccess"
+            :on-remove="handleRemove"
+            :before-upload="beforeUpload"
+            :http-request="customUploadRequest"
+            list-type="picture"
+            :file-list="formData.files"
+          >
+            <template #trigger>
+              <el-button type="primary">Select Files</el-button>
+            </template>
+          </el-upload>
+        </el-form-item>
       </el-form>
     </div>
     <template #footer>
@@ -60,6 +78,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { editInformation } from '@/api/back/audit'
+import { upload } from '@/api/file'
 import { ElMessage } from 'element-plus'
 import { cityList } from '@/config/city'
 
@@ -75,6 +94,7 @@ const formData = ref({
   expectPrice: '', // 期望售价
   name: '', // 姓名
   phone: '', // 联系电话
+  files: [], // 上传的文件
   // remarks: '',
 })
 const rules = reactive({
@@ -105,7 +125,10 @@ const submitForm = async (formEl) => {
     if (!valid) return
     try {
       submitLoading.value = true
-      const res = await editInformation(formData.value)
+      const res = await editInformation({
+        ...formData.value,
+        files: formData.value.files.map((item) => item.url),
+      })
       if (res.status === 200) {
         emit('submit')
         cancel()
@@ -127,6 +150,11 @@ function open(data) {
   visible.value = true
   if (data) {
     formData.value = data
+    // 图片回显
+    formData.value.files =
+      data.images?.split(',').map((item) => {
+        return { url: item, name: item.split('/').pop() }
+      }) || []
   }
 }
 defineExpose({ open }) // 指定要暴露open方法出去
@@ -135,8 +163,45 @@ defineExpose({ open }) // 指定要暴露open方法出去
 function cancel() {
   visible.value = false
 }
+
+/**
+ * 上传功能
+ */
+// 上传成功
+const handleUploadSuccess = (response, file, fileList) => {
+  if (response) {
+    console.log('Upload success:', response)
+    formData.value.files.push({ url: response[0], name: response[0].split('/').pop() })
+  }
+}
+// 移除
+const handleRemove = (file, fileList) => {
+  console.log('Remove file:', file)
+  formData.value.files = formData.value.files.filter((item) => item.url !== file.url)
+}
+// 上传前
+const beforeUpload = (file) => {
+  // 可以在这里添加文件验证逻辑
+  console.log(file.size)
+  return true
+}
+// 自定义上传请求
+const customUploadRequest = async (options) => {
+  const formData = new FormData()
+  formData.append('files', options.file)
+  const res = await upload(formData)
+  if (res.status === 200) {
+    options.onSuccess(res.data)
+  }
+}
 </script>
 
 <style lang="scss" scoped></style>
 
-<style lang="scss"></style>
+<style lang="scss">
+.common-dialog-content {
+  .el-upload-list__item-file-name {
+    max-width: 172px;
+  }
+}
+</style>
