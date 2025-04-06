@@ -18,7 +18,7 @@ public class ManagerDto implements Serializable {
     /**
      * id
      */
-    private long id;
+    private Long id;
 
     /**
      * 用户id

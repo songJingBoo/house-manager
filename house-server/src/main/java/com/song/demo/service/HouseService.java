@@ -4,10 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.song.demo.common.BizException;
-import com.song.demo.dto.AuditDto;
-import com.song.demo.dto.CommentDto;
-import com.song.demo.dto.HouseDto;
-import com.song.demo.dto.HouseFilterDto;
+import com.song.demo.dto.*;
+import com.song.demo.dto.query.HouseBackQueryDto;
 import com.song.demo.dto.query.HouseQueryDto;
 import com.song.demo.entity.CommentPo;
 import com.song.demo.entity.HouseFilterPo;
@@ -26,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
@@ -49,9 +46,8 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
      * @return
      */
     public List<HouseVo> getHouse(HouseQueryDto query) {
-        query.setStatus("AVAILABLE");
         query.setUserId(SecurityUtils.getUserId());
-        return houseMapper.getHouse(query);
+        return houseMapper.queryHouse(query);
     }
 
     /**
@@ -59,7 +55,7 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
      * @param houseDto
      * @return
      */
-    public Boolean createHouse(HouseDto houseDto) {
+    public Boolean createHouse(HousePublishDto houseDto) {
         HousePo housePo = BeanUtil.copyProperties(houseDto, HousePo.class);
         housePo.setUserId(SecurityUtils.getUserId());
         housePo.setHouseId(UUUtil.getId());

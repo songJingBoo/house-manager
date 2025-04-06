@@ -18,7 +18,7 @@ public class UserDto implements Serializable {
     /**
      * id
      */
-    private long id;
+    private Long id;
 
     /**
      * 用户id

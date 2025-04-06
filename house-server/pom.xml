@@ -125,11 +125,17 @@
             <version>2.3.0</version>
         </dependency>
 
-        <!-- fastJson 解析JSON格式的字符串 -->
+        <!-- fastJson 解析JSON格式的字符串（解决后台Long到前台精度丢失问题） -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.83</version>
+        </dependency>
+        <!-- fastJson （解决日期解析问题） -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.2</version>
         </dependency>
 
         <!-- redis -->

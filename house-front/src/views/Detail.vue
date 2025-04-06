@@ -41,45 +41,33 @@
       </div>
       <!-- 评论列表 -->
       <div v-for="comment in commentList" :key="comment.id" class="comment-item">
-        <div class="comment-author"><User class="comment-icon author" />{{ comment.username }}</div>
+        <div class="comment-author"><User class="comment-icon author" />{{ comment.userId }}</div>
         <div class="comment-content">{{ comment.content }}</div>
         <div class="comment-time">
           <Clock class="comment-icon time" />{{ comment.createTime }}
-          <span class="chat-wrap" :class="{ 'is-actived': replyObj.id === comment.id }" @click="toggleReplyInput(comment, 0)"
-            ><ChatDotSquare class="comment-icon chat" />{{ comment.replies.length }}</span
-          >
-        </div>
-        <div v-if="replyObj.id === comment.id" class="comment-send-wrap" :class="{ 'one-level': replyObj.level === 0, 'two-level': replyObj.level === 1 }">
-          <el-input v-model="replyObj.content" class="comment-send-wrap__input" type="textarea" :rows="3" placeholder="回复评论" />
-          <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论</el-button>
+          <span class="chat-wrap" @click="toggleReplyInput(comment.id)"><ChatDotSquare class="comment-icon chat" />{{ comment.replies.length }}</span>
         </div>
         <!-- 回复列表 -->
         <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
-          <div class="reply-author">
-            <User class="comment-icon author" />{{ reply.username }}
-            <span v-if="reply.replyName" class="reply-to">回复 {{ reply.replyName }}</span>
-          </div>
+          <div class="reply-author"><User class="comment-icon author" />{{ reply.userId }}</div>
           <div class="reply-content">{{ reply.content }}</div>
           <div class="reply-time">
             <Clock class="comment-icon time" />{{ reply.createTime }}
-            <span class="chat-wrap" :class="{ 'is-actived': replyObj.id === reply.id }" @click="toggleReplyInput(reply, 1)"><ChatDotSquare class="comment-icon chat" />回复</span>
-          </div>
-          <div v-if="replyObj.id === reply.id" class="comment-send-wrap" :class="{ 'one-level': replyObj.level === 0, 'two-level': replyObj.level === 1 }">
-            <el-input v-model="replyObj.content" class="comment-send-wrap__input" type="textarea" :rows="3" placeholder="回复评论" />
-            <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论</el-button>
+            <span class="chat-wrap" @click="toggleReplyInput(comment.id)"><ChatDotSquare class="comment-icon chat" />回复</span>
           </div>
         </div>
+        <!-- 回复评论输入框 -->
+        <el-input v-model="newReply[comment.id]" placeholder="回复评论" @keyup.enter="submitComment(comment.id)" style="display: none" :ref="replyInputRef[comment.id]" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { queryHouseDetail, queryCommentList, submitNewComment } from '@/api/house'
 import { MapLocation, OfficeBuilding, Message, Clock, ArrowLeftBold, ArrowRightBold, User, ChatDotSquare } from '@element-plus/icons-vue'
 import 'vue3-carousel/carousel.css'
-import { ElMessage } from 'element-plus'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 
@@ -108,7 +96,7 @@ async function getHouseDetail() {
       houseDetail.value.imgList = res.data.images.split(',')
       currentUrl.value = houseDetail.value.imgList[0]
     } else {
-      ElMessage.error(res.message)
+      this.$message.error(res.message)
     }
   } catch (e) {
     console.log(e)
@@ -117,6 +105,7 @@ async function getHouseDetail() {
 
 const commentList = ref([])
 const newComment = ref('')
+const newReply = ref({})
 // 获取评论列表
 async function getCommentList() {
   try {
@@ -135,16 +124,10 @@ async function getCommentList() {
 
       // 关联评论和回复
       comments.forEach((comment) => {
-        comment.showInput = false
         if (comment.parentId) {
           const parentComment = commentMap[comment.parentId]
           if (parentComment) {
-            const gradParentComment = commentMap[parentComment.parentId]
-            if (gradParentComment) {
-              gradParentComment.replies.push(comment)
-            } else {
-              parentComment.replies.push(comment)
-            }
+            parentComment.replies.push(comment)
           }
         } else {
           rootComments.push(comment)
@@ -152,8 +135,6 @@ async function getCommentList() {
       })
 
       commentList.value = rootComments
-
-      console.log(rootComments)
     } else {
       console.error(res.message)
     }
@@ -163,40 +144,19 @@ async function getCommentList() {
 }
 
 // 提交评论
-async function submitComment(isReply = 0) {
-  let params
-  if (isReply) {
-    params = {
-      houseId: houseId.value,
-      content: replyObj.value.content,
-      parentId: replyObj.value.id,
-    }
-  } else {
-    params = {
-      houseId: houseId.value,
-      content: newComment.value,
-    }
-  }
-
-  if (!params.content) {
-    ElMessage.info('请输入评论内容')
-    return
-  }
-
-  try {
-    const res = await submitNewComment(params)
-    if (res.status === 200) {
-      if (isReply) {
-        replyObj.value = {}
-      } else {
+async function submitComment(commentId) {
+  if (newComment.value) {
+    try {
+      const res = await submitNewComment({ houseId: houseId.value, content: newComment.value, commentId })
+      if (res.status === 200) {
         newComment.value = ''
+        getCommentList()
+      } else {
+        console.error(res.message)
       }
-      getCommentList()
-    } else {
-      ElMessage.error(res.message)
+    } catch (e) {
+      console.log(e)
     }
-  } catch (e) {
-    console.log(e)
   }
 }
 
@@ -207,26 +167,13 @@ function bookView() {}
 const replyInputRef = ref({})
 const showReplyInput = ref({})
 
-const replyObj = ref({})
-function toggleReplyInput(comment, level) {
-  if (replyObj.value.id && replyObj.value.id === comment.id) {
-    replyObj.value = {}
-    return
+function toggleReplyInput(commentId) {
+  showReplyInput.value[commentId] = !showReplyInput.value[commentId]
+  if (showReplyInput.value[commentId]) {
+    setTimeout(() => {
+      replyInputRef.value[commentId].focus()
+    })
   }
-
-  replyObj.value = {
-    id: comment.id,
-    level,
-    content: '',
-  }
-  // showReplyInput.value[commentId] = !showReplyInput.value[commentId]
-  // if (showReplyInput.value[commentId]) {
-  //   nextTick(() => {
-  //     if (replyInputRef.value[commentId]) {
-  //       replyInputRef.value[commentId].focus()
-  //     }
-  //   })
-  // }
 }
 </script>
 
@@ -343,18 +290,13 @@ function toggleReplyInput(comment, level) {
 
     .chat-wrap {
       cursor: pointer;
-      &:hover,
-      &.actived {
+      &:hover {
         color: var(--theme-color);
       }
     }
 
     .comment-send-wrap {
       position: relative;
-      margin: 15px 0;
-      &.one-level {
-        margin-left: 20px;
-      }
       .comment-send-wrap__input {
         :deep(.el-textarea__inner) {
           padding-right: 108px;
@@ -379,13 +321,11 @@ function toggleReplyInput(comment, level) {
 
       .comment-content {
         margin-top: 5px;
-        margin-left: 20px;
         color: #666;
       }
 
       .comment-time {
         margin-top: 5px;
-        margin-left: 20px;
         font-size: 12px;
         color: #999;
       }

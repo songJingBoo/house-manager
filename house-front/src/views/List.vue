@@ -5,13 +5,8 @@
         <div class="filter-item__name">{{ item.name }}</div>
         <div class="filter-item__options">
           <el-checkbox-group v-model="item.checked" @change="onFilterChange">
-            <el-checkbox v-for="(opt, i) in item.options" :key="i" :label="opt.label" :value="opt.value" />
+            <el-checkbox v-for="(opt, i) in item.config" :key="i" :label="opt.label" :value="opt.value" />
           </el-checkbox-group>
-          <!-- <div class="option" v-for="(opt, i) in item.options" :key="i">
-            <span>{{ opt.min }}</span>
-            <span>{{ opt.eq }}</span>
-            <span>{{ opt.max }}</span>
-          </div> -->
         </div>
       </div>
     </div>
@@ -20,10 +15,9 @@
       <div class="house-content--left">
         <div class="house-sort">
           <el-tabs v-model="sortType" class="theme" @tab-click="getHouseList">
-            <el-tab-pane label="最新发布" name="createTime"></el-tab-pane>
-            <el-tab-pane label="总价" name="totalPrice"></el-tab-pane>
-            <el-tab-pane label="单价" name="unitPrice"></el-tab-pane>
-            <el-tab-pane label="面积" name=""></el-tab-pane>
+            <el-tab-pane label="最新发布" name="create_time"></el-tab-pane>
+            <el-tab-pane label="总价" name="expect_price"></el-tab-pane>
+            <el-tab-pane label="面积" name="area"></el-tab-pane>
           </el-tabs>
         </div>
 
@@ -85,6 +79,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { queryHouseList, queryFilterConfig, likeHouse } from '@/api/house'
+import { queryHouseFilter } from '@/api/back/house-manage'
 import { ElMessage } from 'element-plus'
 import { MapLocation, OfficeBuilding, Message, Clock } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
@@ -103,8 +98,9 @@ onMounted(() => {
 const filterList = ref([])
 async function getFilterConfig() {
   try {
-    const res = await queryFilterConfig()
-    if (res.code === 200) {
+    const res = await queryHouseFilter()
+    if (res.status === 200) {
+      console.log(res)
       filterList.value = handlerFilter(res.data)
     } else {
       ElMessage.error(res.message)
@@ -117,8 +113,9 @@ async function getFilterConfig() {
 /**
  * 选中过滤项
  */
+const filterChecked = ref([])
 function onFilterChange() {
-  const filterChecked = filterList.value
+  filterChecked.value = filterList.value
     .filter((item) => item.checked?.length > 0)
     .map((item) => {
       return {
@@ -126,13 +123,14 @@ function onFilterChange() {
         checked: item.checked,
       }
     })
-  console.log(filterChecked)
+  getHouseList()
 }
 
 // 处理过滤项（计算单项label / value值）
 function handlerFilter(filterList) {
   ;(filterList || []).forEach((item) => {
-    item.options.forEach((opt) => {
+    item.config = JSON.parse(item.config) || []
+    item.config.forEach((opt) => {
       const { min, eq, max } = opt
       // 固定值
       if (eq !== undefined) {
@@ -173,12 +171,15 @@ function getLayoutTxt(layout) {
 /**
  * 获取房屋列表
  */
-const sortType = ref('createTime')
+const sortType = ref('create_time')
 const total = ref(0)
 const houseList = ref([])
 async function getHouseList() {
   try {
-    const res = await queryHouseList({})
+    const res = await queryHouseList({
+      sortType: sortType.value,
+      filter: filterChecked.value,
+    })
     if (res.status === 200) {
       houseList.value = res.data || []
       total.value = res.data.length || 0

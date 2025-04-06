@@ -17,6 +17,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="getListFn">Search</el-button>
+          <el-button type="primary" @click="filterFn">Filter Config</el-button>
         </el-form-item>
       </el-form>
     </template>
@@ -45,6 +46,8 @@
 
     <!-- 信息修改 -->
     <EditDialog ref="editRef" @submit="getListFn" />
+    <!-- 过滤项配置 -->
+    <FilterDialog ref="filterRef" @submit="getListFn" />
   </BasePage>
 </template>
 
@@ -52,6 +55,7 @@
 import { ref, onMounted, useTemplateRef } from 'vue'
 import BasePage from '@/components/back/Base-page.vue'
 import EditDialog from './audit/edit-dialog.vue'
+import FilterDialog from './house/filter-dialog.vue'
 import { queryHouseList } from '@/api/back/house-manage'
 import { cityList } from '@/config/city'
 
@@ -101,6 +105,12 @@ async function getListFn(isInit = true) {
 const editRef = useTemplateRef('editRef')
 function editFn(data) {
   editRef.value.open(data)
+}
+
+// 打开过滤项配置弹窗
+const filterRef = useTemplateRef('filterRef')
+function filterFn() {
+  filterRef.value.open()
 }
 </script>
 

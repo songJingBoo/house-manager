@@ -6,8 +6,7 @@ import com.song.demo.common.BizException;
 import com.song.demo.dto.AuditDto;
 import com.song.demo.dto.HouseDto;
 import com.song.demo.dto.HouseFilterDto;
-import com.song.demo.dto.LoginDto;
-import com.song.demo.dto.query.HouseQueryDto;
+import com.song.demo.dto.query.HouseBackQueryDto;
 import com.song.demo.entity.HouseFilterPo;
 import com.song.demo.entity.HouseImagePo;
 import com.song.demo.entity.HousePo;
@@ -42,7 +41,7 @@ public class HouseBackController {
     /******************************** 房屋管理 start *****************************/
     @ApiOperation("获取房源列表")
     @PostMapping("/list")
-    public List<HouseVo> getHouse(@RequestBody @Valid HouseQueryDto query) {
+    public List<HouseVo> getHouse(@RequestBody @Valid HouseBackQueryDto query) {
         return houseMapper.getHouse(query);
     }
 
@@ -52,7 +51,7 @@ public class HouseBackController {
         HousePo housePo = BeanUtil.copyProperties(houseDto, HousePo.class);
         int count = houseMapper.updateById(housePo);
         if (count == 0) {
-            throw new BizException("房屋编辑失败");
+            throw new BizException("房屋不存在");
         }
 
         houseImageMapper.delete(Wrappers.<HouseImagePo>lambdaQuery().eq(HouseImagePo::getHouseId, houseDto.getHouseId()));
@@ -74,16 +73,20 @@ public class HouseBackController {
     }
 
     @ApiOperation("保存过滤条件配置")
-    @PutMapping("/filter/config")
-    public Boolean saveFilterConfig(@RequestBody @Valid HouseFilterDto houseFilterDto) {
-        int count = houseFilterMapper.saveFilterConfig(houseFilterDto);
-        return count == 1;
+    @PostMapping("/filter/config")
+    public void saveFilterConfig(@RequestBody @Valid List<HouseFilterDto> houseFilterDtos) {
+        houseFilterMapper.delete(Wrappers.<HouseFilterPo>lambdaQuery());
+        houseFilterDtos.forEach(houseFilterDto -> {
+            HouseFilterPo houseFilterPo = new HouseFilterPo();
+            BeanUtil.copyProperties(houseFilterDto, houseFilterPo);
+            houseFilterMapper.insert(houseFilterPo);
+        });
     }
     /******************************** 房屋管理 end *****************************/
     /******************************** 房屋审核 start *****************************/
     @ApiOperation("获取房源列表")
     @PostMapping("/audit/list")
-    public List<HouseVo> getAuditHouse(@RequestBody @Valid HouseQueryDto query) {
+    public List<HouseVo> getAuditHouse(@RequestBody @Valid HouseBackQueryDto query) {
         return houseMapper.getHouse(query);
     }
 
@@ -93,7 +96,7 @@ public class HouseBackController {
         HousePo housePo = BeanUtil.copyProperties(houseDto, HousePo.class);
         int count = houseMapper.updateById(housePo);
         if (count == 0) {
-            throw new BizException("房屋编辑失败");
+            throw new BizException("房屋不存在");
         }
 
         houseImageMapper.delete(Wrappers.<HouseImagePo>lambdaQuery().eq(HouseImagePo::getHouseId, houseDto.getHouseId()));

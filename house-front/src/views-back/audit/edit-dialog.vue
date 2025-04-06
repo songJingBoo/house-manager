@@ -34,7 +34,7 @@
           <el-input-number v-model="formData.floor" :step="1" :max="50" controls-position="right" />
         </el-form-item>
         <el-form-item label="Expected price" prop="expectPrice">
-          <el-input-number v-model="formData.expectPrice" :step="1" :max="50" controls-position="right">
+          <el-input-number v-model="formData.expectPrice" :step="1" :max="500" controls-position="right">
             <template #suffix>
               <span>¥10K</span>
             </template>
@@ -125,7 +125,10 @@ const submitForm = async (formEl) => {
     if (!valid) return
     try {
       submitLoading.value = true
-      const res = await editInformation(formData.value)
+      const res = await editInformation({
+        ...formData.value,
+        files: formData.value.files.map((item) => item.url),
+      })
       if (res.status === 200) {
         emit('submit')
         cancel()

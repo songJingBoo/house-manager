@@ -2,17 +2,15 @@ package com.song.demo.controller;
 
 import com.song.demo.dto.CommentDto;
 import com.song.demo.dto.HouseDto;
-import com.song.demo.dto.HouseFilterDto;
+import com.song.demo.dto.HousePublishDto;
 import com.song.demo.dto.LoginDto;
+import com.song.demo.dto.query.HouseBackQueryDto;
 import com.song.demo.dto.query.HouseQueryDto;
-import com.song.demo.entity.CommentPo;
 import com.song.demo.entity.HouseFilterPo;
-import com.song.demo.entity.HousePo;
 import com.song.demo.service.HouseService;
 import com.song.demo.vo.CommentVo;
 import com.song.demo.vo.HouseVo;
 import io.swagger.annotations.ApiOperation;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,9 +30,9 @@ public class HouseController {
         return houseService.getHouse(query);
     }
 
-    @ApiOperation("创建房源")
+    @ApiOperation("发布房源")
     @PostMapping("/create")
-    public Boolean createHouse(@RequestBody @Valid HouseDto houseDto) {
+    public Boolean createHouse(@RequestBody @Valid HousePublishDto houseDto) {
         return houseService.createHouse(houseDto);
     }
 

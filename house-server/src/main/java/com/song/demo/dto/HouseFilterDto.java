@@ -19,12 +19,18 @@ public class HouseFilterDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "过滤项id不能为空")
-    private Integer id;
+    @NotNull(message = "过滤项code不能为空")
+    private String code;
+
+    @NotNull(message = "过滤项名称不能为空")
+    private String name;
 
     @NotNull(message = "过滤项状态不能为空")
     private Integer status;
 
     @NotEmpty(message = "过滤项配置不能为空")
     private String config;
+
+    @NotEmpty(message = "过滤项单位不能为空")
+    private String suffix;
 }

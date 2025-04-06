@@ -34,6 +34,11 @@ public class HouseFilterPo implements Serializable {
     private String config;
 
     /**
+     * 过滤项单位
+     */
+    private String suffix;
+
+    /**
      * 状态（0 禁用 / 1 启用）
      */
     private Integer status;

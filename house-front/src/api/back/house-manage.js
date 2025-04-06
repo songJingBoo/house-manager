@@ -17,3 +17,21 @@ export function editHouse(data) {
     data,
   })
 }
+
+// 获取过滤项
+export function queryHouseFilter(params) {
+  return request({
+    url: '/back/filter/get',
+    method: 'get',
+    params,
+  })
+}
+
+// 保存过滤项
+export function saveHouseFilter(data) {
+  return request({
+    url: '/back/filter/config',
+    method: 'post',
+    data,
+  })
+}

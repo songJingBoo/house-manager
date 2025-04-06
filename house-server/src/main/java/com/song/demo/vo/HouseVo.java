@@ -60,6 +60,8 @@ public class HouseVo implements Serializable {
 
     private String images;
 
+    private String imageCover;
+
     private String creator;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")

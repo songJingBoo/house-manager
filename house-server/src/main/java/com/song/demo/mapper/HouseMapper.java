@@ -1,6 +1,7 @@
 package com.song.demo.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.song.demo.dto.query.HouseBackQueryDto;
 import com.song.demo.dto.query.HouseQueryDto;
 import com.song.demo.entity.HousePo;
 import com.song.demo.vo.HouseVo;
@@ -17,7 +18,15 @@ public interface HouseMapper extends BaseMapper<HousePo> {
      * @param query
      * @return
      */
-    List<HouseVo> getHouse(@Param("query") HouseQueryDto query);
+    List<HouseVo> getHouse(@Param("query") HouseBackQueryDto query);
+
+
+    /**
+     * 获取房源列表
+     * @param query
+     * @return
+     */
+    List<HouseVo> queryHouse(@Param("query") HouseQueryDto query);
 
     /**
      * 获取房源详情
