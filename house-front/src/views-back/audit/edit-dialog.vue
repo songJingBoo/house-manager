@@ -125,10 +125,7 @@ const submitForm = async (formEl) => {
     if (!valid) return
     try {
       submitLoading.value = true
-      const res = await editInformation({
-        ...formData.value,
-        files: formData.value.files.map((item) => item.url),
-      })
+      const res = await editInformation(formData.value)
       if (res.status === 200) {
         emit('submit')
         cancel()

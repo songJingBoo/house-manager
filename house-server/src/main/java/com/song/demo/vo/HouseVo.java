@@ -56,6 +56,8 @@ public class HouseVo implements Serializable {
 
     private String agentPhone;
 
+    private Integer isLiked;
+
     private String images;
 
     private String creator;

@@ -9,6 +9,7 @@ import com.song.demo.entity.CommentPo;
 import com.song.demo.entity.HouseFilterPo;
 import com.song.demo.entity.HousePo;
 import com.song.demo.service.HouseService;
+import com.song.demo.vo.CommentVo;
 import com.song.demo.vo.HouseVo;
 import io.swagger.annotations.ApiOperation;
 import org.apache.ibatis.annotations.Param;
@@ -63,7 +64,7 @@ public class HouseController {
 
     @ApiOperation("获取房屋评论")
     @GetMapping("/comment/get")
-    public List<CommentPo> getHouseComment(@Param("id") String houseId) {
+    public List<CommentVo> getHouseComment(@RequestParam("id") String houseId) {
         return houseService.getHouseComment(houseId);
     }
 
@@ -75,6 +76,7 @@ public class HouseController {
 
     @ApiOperation("点赞")
     @GetMapping("/like")
-    public void saveComment(@Param("id") String houseId) {
+    public void saveLike(@RequestParam("id") String id, @RequestParam("status") Integer status) {
+        houseService.saveLike(id, status);
     }
 }

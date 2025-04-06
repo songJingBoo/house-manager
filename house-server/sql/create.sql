@@ -48,6 +48,7 @@ CREATE TABLE house_images (
     `id` bigint(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `house_id` varchar(16) NOT NULL,
     `image_url` varchar(255) NOT NULL,
+    `is_cover` tinyint(1) DEFAULT 0 COMMENT '是否封面（0 非封面 / 1 封面）',
     `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (house_id) REFERENCES houses(house_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='房源图片表';
@@ -77,32 +78,33 @@ CREATE TABLE appointments (
 
 CREATE TABLE comments (
     id bigint(11) AUTO_INCREMENT PRIMARY KEY,
+    parent_id bigint(11) DEFAULT NULL,
     house_id varchar(16) NOT NULL,
     user_id varchar(16) NOT NULL,
     content TEXT NOT NULL,
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (house_id) REFERENCES houses(house_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='评论表';
 
-CREATE TABLE replies (
-    reply_id bigint(11) AUTO_INCREMENT PRIMARY KEY,
-    comment_id bigint(11) NOT NULL,
-    user_id varchar(16) NOT NULL,
-    content TEXT NOT NULL,
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (comment_id) REFERENCES comments(id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='回复评论表';
+# CREATE TABLE replies (
+#     reply_id bigint(11) AUTO_INCREMENT PRIMARY KEY,
+#     comment_id bigint(11) NOT NULL,
+#     user_id varchar(16) NOT NULL,
+#     content TEXT NOT NULL,
+#     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+#     FOREIGN KEY (comment_id) REFERENCES comments(id),
+#     FOREIGN KEY (user_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='回复评论表';
 
 CREATE TABLE likes (
    id bigint(11) AUTO_INCREMENT PRIMARY KEY,
-   comment_id bigint(11) NOT NULL,
+   house_id varchar(16) NOT NULL,
    user_id varchar(16) NOT NULL,
-   created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   FOREIGN KEY (comment_id) REFERENCES comments(id),
+   create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (house_id) REFERENCES houses(house_id),
    FOREIGN KEY (user_id) REFERENCES users(user_id),
-   UNIQUE (comment_id, user_id) -- 确保一个用户只能对一个评论点赞一次
-)ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='点赞表';
+   UNIQUE (house_id, user_id) -- 确保一个用户只能对一个房屋关注一次
+)ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='关注表';

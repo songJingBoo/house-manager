@@ -54,6 +54,8 @@
                 </div>
               </div>
             </div>
+            <!-- 关注按钮 -->
+            <div class="like-btn" :class="{ 'is-liked': item.isLiked }" @click="likeHouseFn(item)"></div>
           </div>
         </div>
       </div>
@@ -82,7 +84,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { queryHouseList, queryFilterConfig } from '@/api/house'
+import { queryHouseList, queryFilterConfig, likeHouse } from '@/api/house'
 import { ElMessage } from 'element-plus'
 import { MapLocation, OfficeBuilding, Message, Clock } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
@@ -189,6 +191,25 @@ async function getHouseList() {
 }
 
 /**
+ * 关注/取消关注
+ */
+async function likeHouseFn(houseItem) {
+  try {
+    const res = await likeHouse({
+      id: houseItem.houseId,
+      status: houseItem.isLiked ? 0 : 1,
+    })
+    if (res.status === 200) {
+      houseItem.isLiked = !houseItem.isLiked
+    } else {
+      ElMessage.error(res.message)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+/**
  * 跳转房屋详情页
  * @param id
  */
@@ -238,6 +259,7 @@ function linkToDetail(id) {
           display: flex;
           align-items: center;
           border-bottom: 1px solid #eee;
+          position: relative;
           .house-img {
             width: 232px;
             height: 174px;
@@ -294,6 +316,25 @@ function linkToDetail(id) {
                   margin-bottom: 6px;
                 }
               }
+            }
+          }
+          .like-btn {
+            display: none;
+            position: absolute;
+            background: url('@/assets/icon/like.svg') no-repeat;
+            width: 32px;
+            height: 32px;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            &.is-liked {
+              display: block;
+              background: url('@/assets/icon/liked.svg') no-repeat;
+            }
+          }
+          &:hover {
+            .like-btn {
+              display: block;
             }
           }
         }

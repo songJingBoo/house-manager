@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.song.demo.mapper.CommentMapper">
+
+    <select id="getHouseComment" resultType="com.song.demo.vo.CommentVo">
+        select
+            c.*,
+            u.username,
+            target_user.username AS reply_name
+        from comments c
+            left join users u on u.user_id = c.user_id
+            LEFT JOIN comments parent ON c.parent_id = parent.id
+            LEFT JOIN users target_user ON parent.user_id = target_user.user_id
+        where c.house_id = #{id}
+        order by c.create_time desc
+    </select>
+</mapper>

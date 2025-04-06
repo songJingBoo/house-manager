@@ -18,6 +18,11 @@ public class CommentPo implements Serializable {
     private Long id;
 
     /**
+     * 父评论id
+     */
+    private Long parentId;
+
+    /**
      * 房源id
      */
     private String houseId;

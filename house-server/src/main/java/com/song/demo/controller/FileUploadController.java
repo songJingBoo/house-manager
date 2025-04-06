@@ -2,8 +2,6 @@ package com.song.demo.controller;
 
 import cn.hutool.core.net.URLDecoder;
 import com.song.demo.common.BizException;
-import com.song.demo.common.ResultData;
-import com.song.demo.common.ReturnCode;
 import com.song.demo.util.FileUploadUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -42,7 +40,7 @@ public class FileUploadController {
     }
 
     @GetMapping("/file/{*relativePath}")
-    public ResponseEntity<ResultData<Resource>> getFile(@PathVariable String relativePath) {
+    public ResponseEntity<Resource> getFile(@PathVariable String relativePath) {
         try {
             // 1. 路径解码和安全处理
             String decodedPath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
@@ -50,7 +48,7 @@ public class FileUploadController {
 
             // 2. 验证路径格式
             if (!decodedPath.startsWith(accessPrefix)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResultData.fail(ReturnCode.C400.getCode(), "路径格式错误"));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
 
             // 3. 提取实际文件名
@@ -62,7 +60,7 @@ public class FileUploadController {
 
             // 5. 路径安全检查
 //            if (!filePath.startsWith(basePath)) {
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ResultData.fail(ReturnCode.C403.getCode(), "没有权限访问该文件"));
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 //            }
 
             // 6. 加载文件资源
@@ -79,15 +77,14 @@ public class FileUploadController {
                         .contentType(MediaType.parseMediaType(contentType))
                         .header(HttpHeaders.CONTENT_DISPOSITION,
                                 "inline; filename=\"" + resource.getFilename() + "\"")
-                        .body(ResultData.success(resource));
+                        .body(resource);
             } else {
-//                return ResponseEntity.notFound().body(ResultData.fail(ReturnCode.C404.getCode(), "文件未找到"));
+                return ResponseEntity.notFound().build();
             }
         } catch (MalformedURLException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResultData.fail(ReturnCode.C400.getCode(), "URL格式错误"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(ResultData.fail(ReturnCode.C500.getCode(), "服务器内部错误"));
+            return ResponseEntity.internalServerError().build();
         }
-        return null;
     }
 }

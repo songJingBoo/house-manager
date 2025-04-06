@@ -12,11 +12,14 @@ import com.song.demo.dto.query.HouseQueryDto;
 import com.song.demo.entity.CommentPo;
 import com.song.demo.entity.HouseFilterPo;
 import com.song.demo.entity.HousePo;
+import com.song.demo.entity.LikePo;
 import com.song.demo.mapper.CommentMapper;
 import com.song.demo.mapper.HouseFilterMapper;
 import com.song.demo.mapper.HouseMapper;
+import com.song.demo.mapper.LikeMapper;
 import com.song.demo.util.SecurityUtils;
 import com.song.demo.util.UUUtil;
+import com.song.demo.vo.CommentVo;
 import com.song.demo.vo.HouseVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,9 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
     @Autowired
     private CommentMapper commentMapper;
 
+    @Autowired
+    private LikeMapper likeMapper;
+
     /**
      * 获取房源列表
      * @param query
@@ -44,6 +50,7 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
      */
     public List<HouseVo> getHouse(HouseQueryDto query) {
         query.setStatus("AVAILABLE");
+        query.setUserId(SecurityUtils.getUserId());
         return houseMapper.getHouse(query);
     }
 
@@ -123,9 +130,11 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
      * @param houseId
      * @return
      */
-    public List<CommentPo> getHouseComment(String houseId) {
-        return commentMapper.selectList(Wrappers.<CommentPo>lambdaQuery().eq(CommentPo::getHouseId, houseId));
+    public List<CommentVo> getHouseComment(String houseId) {
+        return commentMapper.getHouseComment(houseId);
+//        return commentMapper.selectList(Wrappers.<CommentPo>lambdaQuery().eq(CommentPo::getHouseId, houseId));
     }
+
 
     /**
      * 发表评论
@@ -133,12 +142,29 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
      * @return
      */
     public Boolean saveComment(CommentDto commentDto) {
-        if (commentDto.getCommentId() == null) { // 评论
-
-        } else { // 回复
-
-        }
-        return true;
+        CommentPo commentPo = new CommentPo();
+        BeanUtils.copyProperties(commentDto, commentPo);
+        commentPo.setUserId(SecurityUtils.getUserId());
+        int count = commentMapper.insert(commentPo);
+        return count == 1;
     }
 
+    /**
+     * 关注房屋
+     * @param houseId
+     * @param status
+     * @return
+     */
+    public void saveLike(String houseId, Integer status) {
+        if (status == 1) {
+            LikePo likePo = new LikePo();
+            likePo.setHouseId(houseId);
+            likePo.setUserId(SecurityUtils.getUserId());
+            likeMapper.insert(likePo);
+        } else {
+            likeMapper.delete(Wrappers.<LikePo>lambdaQuery()
+                    .eq(LikePo::getHouseId, houseId)
+                    .eq(LikePo::getUserId, SecurityUtils.getUserId()));
+        }
+    }
 }

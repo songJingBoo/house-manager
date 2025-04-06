@@ -34,3 +34,30 @@ export function publishHouse(data) {
     data,
   })
 }
+
+// 关注房源
+export function likeHouse(params) {
+  return request({
+    url: '/house/like',
+    method: 'get',
+    params,
+  })
+}
+
+// 获取评论
+export function queryCommentList(params) {
+  return request({
+    url: '/house/comment/get',
+    method: 'get',
+    params,
+  })
+}
+
+// 发布评论
+export function submitNewComment(data) {
+  return request({
+    url: '/house//comment/send',
+    method: 'post',
+    data,
+  })
+}

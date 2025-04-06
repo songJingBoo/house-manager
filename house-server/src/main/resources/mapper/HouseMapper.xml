@@ -7,7 +7,14 @@
             h.*,
             u.username as agent_name,
             u.phone as agent_phone,
-            GROUP_CONCAT(hi.image_url) as images
+            GROUP_CONCAT(hi.image_url) as images,
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM likes k
+                    WHERE h.house_id = k.house_id and k.user_id = #{query.userId}
+                ) THEN 1 ELSE 0
+            END AS is_liked
         from houses h
             left join users u on h.agent = u.user_id
             left join house_images hi on h.house_id = hi.house_id
@@ -40,9 +47,11 @@
         select
             h.*,
             u.username as agent_name,
-            u.phone as agent_phone
+            u.phone as agent_phone,
+            GROUP_CONCAT(hi.image_url) as images
         from houses h
-        left join users u on h.agent = u.user_id
+            left join users u on h.agent = u.user_id
+            left join house_images hi on h.house_id = hi.house_id
         where h.house_id = #{id}
     </select>
 </mapper>

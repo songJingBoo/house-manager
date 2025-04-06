@@ -29,6 +29,8 @@ public class HouseQueryDto {
 
     private String status;
 
+    private String userId;
+
     @Enumerated(EnumType.STRING)
     private IntentionEn intention;
 }

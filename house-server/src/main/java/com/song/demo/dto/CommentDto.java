@@ -18,7 +18,7 @@ public class CommentDto implements Serializable {
     /**
      * 父评论id
      */
-    private Integer commentId;
+    private Long parentId;
 
     @NotEmpty(message = "评论内容不能为空")
     private String content;
