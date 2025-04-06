@@ -3,9 +3,11 @@ package com.song.demo.enums;
 import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public enum LayoutEn {
 
     ONE(1, "one-bedroom"),

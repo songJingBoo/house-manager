@@ -29,6 +29,9 @@ public class HouseDto implements Serializable {
 
     private String houseId;
 
+    @NotBlank(message = "标题不能为空")
+    private String title;
+
     @NotNull(message = "户型不能为空")
     @Enumerated(EnumType.STRING)
     private LayoutEn layout;

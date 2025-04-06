@@ -2,6 +2,9 @@
   <el-dialog v-model="visible" title="Edit Property" width="500" :before-close="cancel">
     <div class="common-dialog-content" style="max-height: 520px; overflow-y: auto">
       <el-form ref="publishFormRef" class="publish-page__form" :model="formData" :rules="rules" label-width="auto" style="max-width: 600px">
+        <el-form-item label="Title" prop="title">
+          <el-input v-model="formData.title" />
+        </el-form-item>
         <el-form-item label="City" prop="city">
           <el-select v-model="formData.city" placeholder="Select">
             <el-option v-for="item in cityList" :key="item" :label="item" :value="item" />
@@ -84,6 +87,7 @@ import { cityList } from '@/config/city'
 
 const emit = defineEmits(['submit'])
 const formData = ref({
+  title: '', // 标题
   city: '',
   community: '', // 小区
   address: '',
@@ -98,6 +102,7 @@ const formData = ref({
   // remarks: '',
 })
 const rules = reactive({
+  title: [{ required: true, message: 'Please input title' }],
   city: [{ required: true, message: 'Please select city' }],
   community: [
     { required: true, message: 'Please input community name' },

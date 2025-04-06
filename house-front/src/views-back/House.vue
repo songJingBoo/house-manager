@@ -24,6 +24,7 @@
 
     <div class="common-table">
       <el-table v-loading="loading" class="common-table__table" :data="tableData" style="width: 100%">
+        <el-table-column label="Title" prop="titleTxt" width="180" />
         <el-table-column label="Layout" prop="layoutTxt" width="180" />
         <el-table-column label="Area" prop="areaTxt" width="180" />
         <el-table-column label="Expected price" prop="expectPriceTxt" width="180" />
@@ -88,6 +89,7 @@ async function getListFn(isInit = true) {
       tableData.value = (res.data || []).map((item) => {
         return {
           ...item,
+          titleTxt: item.title || '--',
           layoutTxt: `${item.layout.toLowerCase()}-bedroom`,
           areaTxt: `${item.area}㎡`,
           expectPriceTxt: `${item.area}￥10k`,

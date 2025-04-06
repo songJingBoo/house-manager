@@ -40,31 +40,49 @@
         <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment()">发表评论</el-button>
       </div>
       <!-- 评论列表 -->
-      <div v-for="comment in commentList" :key="comment.id" class="comment-item">
-        <div class="comment-author"><User class="comment-icon author" />{{ comment.userId }}</div>
-        <div class="comment-content">{{ comment.content }}</div>
-        <div class="comment-time">
-          <Clock class="comment-icon time" />{{ comment.createTime }}
-          <span class="chat-wrap" @click="toggleReplyInput(comment.id)"><ChatDotSquare class="comment-icon chat" />{{ comment.replies.length }}</span>
-        </div>
-        <!-- 回复列表 -->
-        <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
-          <div class="reply-author"><User class="comment-icon author" />{{ reply.userId }}</div>
-          <div class="reply-content">{{ reply.content }}</div>
-          <div class="reply-time">
-            <Clock class="comment-icon time" />{{ reply.createTime }}
-            <span class="chat-wrap" @click="toggleReplyInput(comment.id)"><ChatDotSquare class="comment-icon chat" />回复</span>
+      <div class="comment-list">
+        <div v-for="comment in commentList" :key="comment.id" class="comment-item">
+          <div class="comment-author">
+            <User class="comment-icon author" />{{ comment.username }}
+            <span v-if="comment.replyName">回复 {{ comment.replyName }}</span>
+          </div>
+          <div class="comment-content-warp">
+            <div class="comment-content">{{ comment.content }}</div>
+            <div class="comment-time">
+              <Clock class="comment-icon time" />{{ comment.createTime }}
+              <span class="chat-wrap" @click="toggleReplyInput(comment)"><ChatDotSquare class="comment-icon chat" />{{ comment.replies.length }}</span>
+            </div>
+            <div v-if="replyObj.id === comment.id" class="comment-send-wrap">
+              <el-input v-model="replyObj.content" class="comment-send-wrap__input" type="textarea" :rows="3" placeholder="回复评论" />
+              <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论1</el-button>
+            </div>
+          </div>
+          <!-- 回复列表 -->
+          <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
+            <div class="reply-author">
+              <User class="comment-icon author" />{{ reply.username }}
+              <span v-if="reply.replyName">回复 {{ reply.replyName }}</span>
+            </div>
+            <div class="reply-content-warp">
+              <div class="reply-content">{{ reply.content }}</div>
+              <div class="reply-time">
+                <Clock class="comment-icon time" />{{ reply.createTime }}
+                <span class="chat-wrap" @click="toggleReplyInput(reply)"><ChatDotSquare class="comment-icon chat" />回复</span>
+              </div>
+              <div v-if="replyObj.id === reply.id" class="comment-send-wrap">
+                <el-input v-model="replyObj.content" class="comment-send-wrap__input" type="textarea" :rows="3" placeholder="回复评论" />
+                <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论2</el-button>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- 回复评论输入框 -->
-        <el-input v-model="newReply[comment.id]" placeholder="回复评论" @keyup.enter="submitComment(comment.id)" style="display: none" :ref="replyInputRef[comment.id]" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { queryHouseDetail, queryCommentList, submitNewComment } from '@/api/house'
 import { MapLocation, OfficeBuilding, Message, Clock, ArrowLeftBold, ArrowRightBold, User, ChatDotSquare } from '@element-plus/icons-vue'
 import 'vue3-carousel/carousel.css'
@@ -105,7 +123,6 @@ async function getHouseDetail() {
 
 const commentList = ref([])
 const newComment = ref('')
-const newReply = ref({})
 // 获取评论列表
 async function getCommentList() {
   try {
@@ -119,15 +136,22 @@ async function getCommentList() {
       // 构建评论映射
       comments.forEach((comment) => {
         comment.replies = []
+        comment.showInput = false
         commentMap[comment.id] = comment
       })
 
       // 关联评论和回复
       comments.forEach((comment) => {
+        comment.showInput = false
         if (comment.parentId) {
           const parentComment = commentMap[comment.parentId]
           if (parentComment) {
-            parentComment.replies.push(comment)
+            const gradParentComment = commentMap[parentComment.parentId]
+            if (gradParentComment) {
+              gradParentComment.replies.push(comment)
+            } else {
+              parentComment.replies.push(comment)
+            }
           }
         } else {
           rootComments.push(comment)
@@ -144,19 +168,34 @@ async function getCommentList() {
 }
 
 // 提交评论
-async function submitComment(commentId) {
-  if (newComment.value) {
-    try {
-      const res = await submitNewComment({ houseId: houseId.value, content: newComment.value, commentId })
-      if (res.status === 200) {
-        newComment.value = ''
-        getCommentList()
-      } else {
-        console.error(res.message)
-      }
-    } catch (e) {
-      console.log(e)
+async function submitComment(isReply = 0) {
+  let params
+  if (isReply) {
+    params = {
+      houseId: houseId.value,
+      content: replyObj.value.content,
+      parentId: replyObj.value.id,
     }
+  } else {
+    params = {
+      houseId: houseId.value,
+      content: newComment.value,
+    }
+  }
+  try {
+    const res = await submitNewComment(params)
+    if (res.status === 200) {
+      if (isReply) {
+        replyObj.value = {}
+      } else {
+        newComment.value = ''
+      }
+      getCommentList()
+    } else {
+      console.error(res.message)
+    }
+  } catch (e) {
+    console.log(e)
   }
 }
 
@@ -164,15 +203,20 @@ async function submitComment(commentId) {
  * 预约看房
  */
 function bookView() {}
-const replyInputRef = ref({})
-const showReplyInput = ref({})
 
-function toggleReplyInput(commentId) {
-  showReplyInput.value[commentId] = !showReplyInput.value[commentId]
-  if (showReplyInput.value[commentId]) {
-    setTimeout(() => {
-      replyInputRef.value[commentId].focus()
-    })
+/**
+ * 打开回复框
+ */
+const replyObj = ref({})
+function toggleReplyInput(comment) {
+  if (replyObj.value.id === comment.id) {
+    replyObj.value = {}
+    return
+  }
+  replyObj.value = {
+    id: comment.id,
+    content: '',
+    showInput: true,
   }
 }
 </script>
@@ -295,8 +339,72 @@ function toggleReplyInput(commentId) {
       }
     }
 
+    .comment-list {
+      margin-top: 20px;
+      .comment-item {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+
+        .comment-author {
+          font-weight: bold;
+          color: #333;
+        }
+
+        .comment-content-warp {
+          margin-left: 20px;
+          .comment-content {
+            margin-top: 5px;
+            color: #666;
+          }
+
+          .comment-time {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #999;
+          }
+        }
+
+        .reply-item {
+          margin-top: 15px;
+          margin-left: 20px;
+          padding-left: 10px;
+          border-left: 2px solid #eee;
+
+          .reply-author {
+            font-weight: bold;
+            color: #333;
+          }
+
+          .reply-content-warp {
+            margin-left: 20px;
+            .reply-content {
+              margin-top: 5px;
+              color: #666;
+            }
+
+            .reply-time {
+              margin-top: 5px;
+              font-size: 12px;
+              color: #999;
+            }
+          }
+        }
+
+        input {
+          width: 100%;
+          margin-top: 10px;
+          padding: 8px 12px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+        }
+      }
+    }
+
     .comment-send-wrap {
       position: relative;
+      margin-top: 15px;
       .comment-send-wrap__input {
         :deep(.el-textarea__inner) {
           padding-right: 108px;
@@ -306,60 +414,6 @@ function toggleReplyInput(commentId) {
         position: absolute;
         bottom: 6px;
         right: 10px;
-      }
-    }
-
-    .comment-item {
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #eee;
-
-      .comment-author {
-        font-weight: bold;
-        color: #333;
-      }
-
-      .comment-content {
-        margin-top: 5px;
-        color: #666;
-      }
-
-      .comment-time {
-        margin-top: 5px;
-        font-size: 12px;
-        color: #999;
-      }
-
-      .reply-item {
-        margin-top: 15px;
-        margin-left: 20px;
-        padding-left: 10px;
-        border-left: 2px solid #eee;
-
-        .reply-author {
-          font-weight: bold;
-          color: #333;
-        }
-
-        .reply-content {
-          margin-top: 5px;
-          color: #666;
-        }
-
-        .reply-time {
-          margin-top: 5px;
-          font-size: 12px;
-          color: #999;
-        }
-      }
-
-      input {
-        width: 100%;
-        margin-top: 10px;
-        padding: 8px 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
       }
     }
   }
