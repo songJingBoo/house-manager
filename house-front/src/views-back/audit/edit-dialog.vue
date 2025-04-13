@@ -65,6 +65,17 @@
             <template #trigger>
               <el-button type="primary">Select Files</el-button>
             </template>
+            <template #file="{ file }">
+              <div class="custom-file-item">
+                <el-radio v-model="file.isCover" :label="true" @change="handleCover(file)"></el-radio>
+                <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+                <!-- <div class="el-upload-list__item-actions"> -->
+                <div class="custom-file-item__delete" @click="handleRemove(file)">
+                  <el-icon><Delete /></el-icon>
+                </div>
+                <!-- </div> -->
+              </div>
+            </template>
           </el-upload>
         </el-form-item>
       </el-form>
@@ -83,6 +94,7 @@ import { ref, reactive } from 'vue'
 import { editInformation } from '@/api/back/audit'
 import { upload } from '@/api/file'
 import { ElMessage } from 'element-plus'
+import { Delete, Download } from '@element-plus/icons-vue'
 import { cityList } from '@/config/city'
 
 const emit = defineEmits(['submit'])
@@ -125,6 +137,7 @@ const rules = reactive({
 const submitLoading = ref(false)
 const publishFormRef = ref()
 const submitForm = async (formEl) => {
+  console.log(formData.value.files)
   if (!formEl) return
   formEl.validate(async (valid) => {
     if (!valid) return
@@ -132,7 +145,12 @@ const submitForm = async (formEl) => {
       submitLoading.value = true
       const res = await editInformation({
         ...formData.value,
-        files: formData.value.files.map((item) => item.url),
+        files: formData.value.files.map((item) => {
+          return {
+            path: item.path,
+            isCover: item.isCover ? 1 : 0,
+          }
+        }),
       })
       if (res.status === 200) {
         emit('submit')
@@ -157,8 +175,12 @@ function open(data) {
     formData.value = data
     // 图片回显
     formData.value.files =
-      data.images?.split(',').map((item) => {
-        return { url: item, name: item.split('/').pop() }
+      (data.images || []).map((item) => {
+        return {
+          path: item.imageUrl,
+          url: `${import.meta.env.VITE_FILE_DOMAIN}${item.imageUrl}`,
+          isCover: item.isCover === 1,
+        }
       }) || []
   }
 }
@@ -176,13 +198,24 @@ function cancel() {
 const handleUploadSuccess = (response, file, fileList) => {
   if (response) {
     console.log('Upload success:', response)
-    formData.value.files.push({ url: response[0], name: response[0].split('/').pop() })
+    formData.value.files.push({
+      path: response[0],
+      url: `${import.meta.env.VITE_FILE_DOMAIN}${response[0]}`,
+      isCover: false,
+    })
   }
 }
 // 移除
 const handleRemove = (file, fileList) => {
   console.log('Remove file:', file)
   formData.value.files = formData.value.files.filter((item) => item.url !== file.url)
+}
+// 设置首页图
+const handleCover = (file) => {
+  formData.value.files.forEach((item) => {
+    item.isCover = false
+  })
+  file.isCover = true
 }
 // 上传前
 const beforeUpload = (file) => {
@@ -201,12 +234,48 @@ const customUploadRequest = async (options) => {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.custom-file-item {
+  display: flex;
+  align-items: center;
+  .el-radio__label {
+    display: none;
+  }
+}
+</style>
 
 <style lang="scss">
 .common-dialog-content {
   .el-upload-list__item-file-name {
     max-width: 172px;
+  }
+
+  .el-upload-list {
+    display: flex;
+    flex-wrap: wrap;
+    width: 280px;
+    .el-upload-list__item {
+      width: 130px;
+      position: relative;
+      &:nth-child(2n) {
+        margin-left: 18px;
+      }
+      .custom-file-item__delete {
+        margin-left: 5px;
+        cursor: pointer;
+        &:hover {
+          color: red;
+        }
+      }
+    }
+    .custom-file-item {
+      .el-radio {
+        margin-right: 10px;
+        .el-radio__label {
+          display: none;
+        }
+      }
+    }
   }
 }
 </style>

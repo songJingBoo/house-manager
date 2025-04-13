@@ -2,6 +2,7 @@ package com.song.demo.vo;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.song.demo.entity.HouseImagePo;
 import com.song.demo.enums.HouseStatusEn;
 import com.song.demo.enums.IntentionEn;
 import com.song.demo.enums.LayoutEn;
@@ -58,9 +59,18 @@ public class HouseVo implements Serializable {
 
     private Integer isLiked;
 
-    private String images;
+    private List<HouseImageVo> images;
 
     private String imageCover;
+
+    /**
+     * 预约相关
+     */
+    private Long appointId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", locale = "zh", timezone = "GMT+8")
+    private LocalDateTime appointStartTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", locale = "zh", timezone = "GMT+8")
+    private LocalDateTime appointEndTime;
 
     private String creator;
 

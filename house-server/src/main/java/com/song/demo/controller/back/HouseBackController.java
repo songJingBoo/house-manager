@@ -6,6 +6,7 @@ import com.song.demo.common.BizException;
 import com.song.demo.dto.AuditDto;
 import com.song.demo.dto.HouseDto;
 import com.song.demo.dto.HouseFilterDto;
+import com.song.demo.dto.HouseImageDto;
 import com.song.demo.dto.query.HouseBackQueryDto;
 import com.song.demo.entity.HouseFilterPo;
 import com.song.demo.entity.HouseImagePo;
@@ -14,6 +15,7 @@ import com.song.demo.mapper.HouseFilterMapper;
 import com.song.demo.mapper.HouseImageMapper;
 import com.song.demo.mapper.HouseMapper;
 import com.song.demo.service.HouseService;
+import com.song.demo.vo.HouseImageVo;
 import com.song.demo.vo.HouseVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,12 @@ public class HouseBackController {
     @ApiOperation("获取房源列表")
     @PostMapping("/list")
     public List<HouseVo> getHouse(@RequestBody @Valid HouseBackQueryDto query) {
-        return houseMapper.getHouse(query);
+        List<HouseVo> houseVos = houseMapper.getHouse(query);
+        for (HouseVo vo : houseVos) {
+            List<HouseImageVo> houseImageVos = houseImageMapper.queryImageList(vo.getHouseId());
+            vo.setImages(houseImageVos);
+        }
+        return houseVos;
     }
 
     @ApiOperation("编辑房源")
@@ -55,12 +62,13 @@ public class HouseBackController {
         }
 
         houseImageMapper.delete(Wrappers.<HouseImagePo>lambdaQuery().eq(HouseImagePo::getHouseId, houseDto.getHouseId()));
-        List<String> urls = houseDto.getFiles();
-        if (urls != null && urls.size() > 0) {
-            urls.forEach(url -> {
+        List<HouseImageDto> houseImageDtos = houseDto.getFiles();
+        if (houseImageDtos != null && houseImageDtos.size() > 0) {
+            houseImageDtos.forEach(houseImageDto -> {
                 HouseImagePo imagePo = new HouseImagePo();
                 imagePo.setHouseId(houseDto.getHouseId());
-                imagePo.setImageUrl(url);
+                imagePo.setImageUrl(houseImageDto.getPath());
+                imagePo.setIsCover(houseImageDto.getIsCover());
                 houseImageMapper.insert(imagePo);
             });
         }
@@ -87,7 +95,12 @@ public class HouseBackController {
     @ApiOperation("获取房源列表")
     @PostMapping("/audit/list")
     public List<HouseVo> getAuditHouse(@RequestBody @Valid HouseBackQueryDto query) {
-        return houseMapper.getHouse(query);
+        List<HouseVo> houseVos = houseMapper.getHouse(query);
+        for (HouseVo vo : houseVos) {
+            List<HouseImageVo> houseImageVos = houseImageMapper.queryImageList(vo.getHouseId());
+            vo.setImages(houseImageVos);
+        }
+        return houseVos;
     }
 
     @ApiOperation("编辑房源")
@@ -100,12 +113,13 @@ public class HouseBackController {
         }
 
         houseImageMapper.delete(Wrappers.<HouseImagePo>lambdaQuery().eq(HouseImagePo::getHouseId, houseDto.getHouseId()));
-        List<String> urls = houseDto.getFiles();
-        if (urls != null && urls.size() > 0) {
-            urls.forEach(url -> {
+        List<HouseImageDto> houseImageDtos = houseDto.getFiles();
+        if (houseImageDtos != null && houseImageDtos.size() > 0) {
+            houseImageDtos.forEach(houseImageDto -> {
                 HouseImagePo imagePo = new HouseImagePo();
                 imagePo.setHouseId(houseDto.getHouseId());
-                imagePo.setImageUrl(url);
+                imagePo.setImageUrl(houseImageDto.getPath());
+                imagePo.setIsCover(houseImageDto.getIsCover());
                 houseImageMapper.insert(imagePo);
             });
         }

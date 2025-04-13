@@ -56,7 +56,7 @@ public class AuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetail, null, userDetail.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                 // 更新redis里用户信息的过期时间
-                redisService.expire(claims.getSubject(), 60 * 30); // 假设过期时间为60秒
+                redisService.expire(claims.getSubject(), 60 * 30);
             }
         }
 

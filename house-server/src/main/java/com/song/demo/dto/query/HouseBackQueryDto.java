@@ -29,4 +29,5 @@ public class HouseBackQueryDto {
 
     @Enumerated(EnumType.STRING)
     private IntentionEn intention;
+//    private String intention;
 }

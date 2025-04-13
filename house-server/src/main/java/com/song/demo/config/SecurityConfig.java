@@ -44,6 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // 过滤请求
                 .authorizeRequests()
+                .antMatchers("/files/**").permitAll() // 静态资源访问路径
                 .antMatchers("/permit/**", "/**/permit/**").permitAll()
 //                .antMatchers("/user-api/detail").permitAll()
 //                .antMatchers("/user-api/detail").hasAuthority("admin")

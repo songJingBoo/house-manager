@@ -105,9 +105,9 @@ const otherQuery = ref('') // 路径其他传值
 const formType = ref('login') // 表单类型
 const loginFormRef = useTemplateRef('loginFormRef')
 const loginForm = reactive({
-  username: '',
+  username: 'admin',
   password: '',
-  captcha: '',
+  captcha: '123',
 })
 async function submitForm() {
   const isLogin = formType.value === 'login'

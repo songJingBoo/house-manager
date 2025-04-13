@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,21 +42,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> {
      * @return
      */
     public LoginVo login(LoginDto loginDto) {
+        // 1 创建UsernamePasswordAuthenticationToken
+        UsernamePasswordAuthenticationToken usernameAuthentication = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
+        // 2 认证
+        Authentication authentication;
         try {
-            // 1 创建UsernamePasswordAuthenticationToken
-            UsernamePasswordAuthenticationToken usernameAuthentication = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
-            // 2 认证
-            Authentication authentication = this.authenticationManager.authenticate(usernameAuthentication);
-            // 3 保存认证信息
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            // 放入缓存
-            CustomUserDetails userDetail = (CustomUserDetails) authentication.getPrincipal();
-            redisService.set(userDetail.getUsername(), userDetail);
-            // 4 生成自定义token
-            return JwtUtils.createToken(loginDto.getUsername(), userDetail.getUserId(), userDetail.getRole());
-        } catch (Exception e) {
+            authentication = this.authenticationManager.authenticate(usernameAuthentication);
+        } catch (AuthenticationException e) {
+            e.printStackTrace();
             throw new BizException("用户名或密码错误");
         }
+        // 3 保存认证信息
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 放入缓存
+        CustomUserDetails userDetail = (CustomUserDetails) authentication.getPrincipal();
+        redisService.set(userDetail.getUsername(), userDetail);
+        // 4 生成自定义token
+        return JwtUtils.createToken(loginDto.getUsername(), userDetail.getUserId(), userDetail.getRole());
     }
 
     /**
@@ -71,7 +74,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> {
             throw new BizException("用户名已被注册！");
         }
 
-        // 2.MD5密码 加盐加密处理
+        // 2.MD5密码 内部加盐加密处理
         String finalPassword = passwordEncoder.encode(userDto.getPassword());
 
         // 3.账号入库

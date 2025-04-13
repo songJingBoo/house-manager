@@ -56,8 +56,33 @@ export function queryCommentList(params) {
 // 发布评论
 export function submitNewComment(data) {
   return request({
-    url: '/house//comment/send',
+    url: '/house/comment/send',
     method: 'post',
     data,
+  })
+}
+
+// 获取房屋某日已有预约
+export function queryHouseDate(params) {
+  return request({
+    url: '/appoint/queryHouseDate',
+    method: 'get',
+    params,
+  })
+}
+// 发起预约
+export function createAppointment(data) {
+  return request({
+    url: '/appoint/createAppoint',
+    method: 'post',
+    data,
+  })
+}
+// 取消预约
+export function cancelAppointment(params) {
+  return request({
+    url: '/appoint/deleteAppoint',
+    method: 'delete',
+    params,
   })
 }

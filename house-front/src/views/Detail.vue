@@ -27,7 +27,9 @@
         <div><Message class="item-info__icon" />Area: {{ houseDetail.area }} ㎡</div>
         <div><Message class="item-info__icon" />Agent: {{ houseDetail.agent }} / {{ houseDetail.agentPhone || '--' }}</div>
         <div><Clock class="item-info__icon" />{{ houseDetail.updateTime }}</div>
-        <el-button type="success" @click="bookView">预约看房</el-button>
+        <el-button v-if="!appintedTimeRange" type="primary" @click="openCreateAppointDialog">预约看房</el-button>
+        <el-button v-if="appintedTimeRange" type="success" @click="cancelAppointmentFn">取消预约</el-button>
+        <span v-if="appintedTimeRange" class="appointed-time">{{ appintedTimeRange }}</span>
       </div>
     </div>
 
@@ -54,7 +56,7 @@
             </div>
             <div v-if="replyObj.id === comment.id" class="comment-send-wrap">
               <el-input v-model="replyObj.content" class="comment-send-wrap__input" type="textarea" :rows="3" placeholder="回复评论" />
-              <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论1</el-button>
+              <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论</el-button>
             </div>
           </div>
           <!-- 回复列表 -->
@@ -71,21 +73,26 @@
               </div>
               <div v-if="replyObj.id === reply.id" class="comment-send-wrap">
                 <el-input v-model="replyObj.content" class="comment-send-wrap__input" type="textarea" :rows="3" placeholder="回复评论" />
-                <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论2</el-button>
+                <el-button type="primary" class="comment-send-wrap__btn" @click="submitComment(1)">回复评论</el-button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- 预约 -->
+    <AppointmentDialog ref="appointmentDialogRef" @submit="getHouseDetail" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { queryHouseDetail, queryCommentList, submitNewComment } from '@/api/house'
+import { ref, onMounted, computed, useTemplateRef } from 'vue'
+import { queryHouseDetail, queryCommentList, submitNewComment, cancelAppointment } from '@/api/house'
 import { MapLocation, OfficeBuilding, Message, Clock, ArrowLeftBold, ArrowRightBold, User, ChatDotSquare } from '@element-plus/icons-vue'
+import AppointmentDialog from './detail/Appointment-dialog.vue'
 import 'vue3-carousel/carousel.css'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 
@@ -99,8 +106,55 @@ onMounted(() => {
   getCommentList()
 })
 
+// 是否已预约
+const isAppointed = computed(() => {
+  return !!(houseDetail.value.appointStartTime && houseDetail.value.appointEndTime)
+})
+// 已预约时段
+const appintedTimeRange = computed(() => {
+  if (houseDetail.value.appointStartTime && houseDetail.value.appointEndTime) {
+    const date = houseDetail.value.appointStartTime.split(' ')[0]
+    const startTime = houseDetail.value.appointStartTime.split(' ')[1]
+    const endTime = houseDetail.value.appointEndTime.split(' ')[1]
+    return `${date} ${startTime} ~ ${endTime}`
+  }
+  return ''
+})
+
 function getLayoutTxt(layout) {
   return `${layout?.toLowerCase()}-bedroom`
+}
+
+/**
+ * 取消预约
+ */
+const cancelLoading = ref(false)
+async function cancelAppointmentFn() {
+  const ok = await ElMessageBox.confirm('Confirm cancellation of appointment?', 'Warning', {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+  })
+    .then(() => 1)
+    .catch(() => 0)
+  if (!ok) return
+
+  try {
+    cancelLoading.value = true
+    const res = await cancelAppointment({
+      appointId: houseDetail.value.appointId,
+    })
+    if (res.status === 200) {
+      getHouseDetail()
+      ElMessage.success('Appointment cancelled successfully！')
+    } else {
+      ElMessage.error(res.message || 'Appointment cancelled failed')
+    }
+  } catch (e) {
+    console.log(e)
+  } finally {
+    cancelLoading.value = false
+  }
 }
 
 /**
@@ -111,8 +165,13 @@ async function getHouseDetail() {
     const res = await queryHouseDetail({ id: houseId.value })
     if (res.status === 200) {
       houseDetail.value = res.data || {}
-      houseDetail.value.imgList = res.data.images.split(',')
-      currentUrl.value = houseDetail.value.imgList[0]
+      houseDetail.value.imgList = (res.data.images || []).map((item) => {
+        const url = `${import.meta.env.VITE_FILE_DOMAIN}${item.imageUrl}`
+        if (item.isCover) {
+          currentUrl.value = url
+        }
+        return url
+      })
     } else {
       this.$message.error(res.message)
     }
@@ -202,7 +261,10 @@ async function submitComment(isReply = 0) {
 /**
  * 预约看房
  */
-function bookView() {}
+const appointmentDialogRef = useTemplateRef('appointmentDialogRef')
+function openCreateAppointDialog() {
+  appointmentDialogRef.value.open(houseId.value)
+}
 
 /**
  * 打开回复框
@@ -422,5 +484,12 @@ function toggleReplyInput(comment) {
   .item-info__icon {
     cursor: pointer;
   }
+}
+
+.appointed-time {
+  font-size: 14px;
+  color: #a6a6a6;
+  line-height: 20px;
+  margin-left: 12px;
 }
 </style>

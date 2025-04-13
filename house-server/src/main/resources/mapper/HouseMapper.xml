@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.song.demo.mapper.HouseMapper">
-
+    <!-- Manager Side Query -->
     <select id="getHouse" resultType="com.song.demo.vo.HouseVo">
         select
             h.*,
             u.username as agent_name,
             u.phone as agent_phone,
-            GROUP_CONCAT(hi.image_url) as images,
             CASE
                 WHEN EXISTS (
                     SELECT 1
@@ -17,7 +16,6 @@
             END AS is_liked
         from houses h
             left join users u on h.agent = u.user_id
-            left join house_images hi on h.house_id = hi.house_id
         <where>
             <if test="query.status != null and query.status != ''">
                 and h.status = #{query.status}
@@ -42,6 +40,7 @@
         order by h.create_time desc
     </select>
 
+    <!-- Client Side Query -->
     <select id="queryHouse" resultType="com.song.demo.vo.HouseVo">
         select
             h.*,
@@ -69,16 +68,27 @@
         order by ${query.sortType} desc
     </select>
 
-
+    <!-- Query House Detail -->
     <select id="getHouseById" resultType="com.song.demo.vo.HouseVo">
         select
             h.*,
             u.username as agent_name,
             u.phone as agent_phone,
-            GROUP_CONCAT(hi.image_url) as images
+            ap.id as appoint_id,
+            ap.start_time as appoint_start_time,
+            ap.end_time as appoint_end_time
         from houses h
             left join users u on h.agent = u.user_id
-            left join house_images hi on h.house_id = hi.house_id
+            left join appointments ap on h.house_id = ap.house_id
+                                         and (#{userId} IS NULL OR (ap.user_id = #{userId} and ap.status in ('PENDING', 'CONFIRMED')))
         where h.house_id = #{id}
     </select>
+
+<!--    CASE-->
+<!--    WHEN #{userId} IS NOT NULL AND EXISTS (-->
+<!--    SELECT 1-->
+<!--    FROM appointments ap-->
+<!--    WHERE h.house_id = ap.house_id and ap.user_id = #{userId} and ap.status not in ('PENDING', 'CONFIRMED')-->
+<!--    ) THEN 1 ELSE 0-->
+<!--    END AS is_appointed-->
 </mapper>

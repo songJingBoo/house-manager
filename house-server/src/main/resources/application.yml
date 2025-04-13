@@ -18,7 +18,7 @@ spring:
   redis:
     host: localhost
     port: 6379
-#    password: zsxdc153  @todo 密码设置了但连接不上
+#    password: zsxdc153
   session:
     store-type: redis
     timeout: 60s  # 1分钟过期

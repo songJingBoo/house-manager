@@ -13,7 +13,9 @@ public enum AppointEn {
 
     CONFIRMED("已确认"),
 
-    CANCELLED("已取消");
+    CANCELLED("已取消"),
+
+    FINISHED("已完成");
 
     private String description;
 }

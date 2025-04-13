@@ -70,18 +70,32 @@ insert into house_filter (name, code, config, suffix) values
 ('单价', 'unitPrice', '[{"max":5000},{"min":5000,"max":8000},{"min":8000,"max":100000},{"min":10000}]', '元/㎡'),
 ('总价', 'totalPrice', '[{"max":40},{"min":40,"max":60},{"min":60,"max":80},{"min":80}]', '元'),
 ('面积', 'area', '[{"max":50},{"min":50,"max":70},{"min":70,"max":90},{"min":90}]', '㎡'),
-('户型', 'layout',
- '[{"eq":1},{"eq":2},{"eq":3},{"eq":4},{"min":5}]', '居');
+('户型', 'layout', '[{"eq":1},{"eq":2},{"eq":3},{"eq":4},{"min":5}]', '居');
 
 CREATE TABLE appointments (
-    id bigint(8) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id varchar(16) NOT NULL,
     house_id varchar(16) NOT NULL,
-    appointment_time datetime NOT NULL COMMENT '约定时间',
-    status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending' COMMENT '预约状态',
+    start_time datetime NOT NULL COMMENT '约定开始时间',
+    end_time datetime NOT NULL COMMENT '约定结束时间',
+    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'FINISHED') DEFAULT 'PENDING' COMMENT '预约状态',
     create_time datetime DEFAULT CURRENT_TIMESTAMP,
+    unique_key VARCHAR(255) GENERATED ALWAYS AS (
+        CASE
+            WHEN status in ('PENDING', 'CONFIRMED')
+                THEN CONCAT(
+                    house_id,
+                    '_',
+                    DATE_FORMAT(start_time, '%Y%m%d%H%i'),
+                    '_',
+                    DATE_FORMAT(end_time, '%Y%m%d%H%i')
+                )
+            ELSE NULL
+        END
+    ) VIRTUAL,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (house_id) REFERENCES houses(house_id)
+    FOREIGN KEY (house_id) REFERENCES houses(house_id),
+    UNIQUE (unique_key)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='预约表';
 
 CREATE TABLE comments (

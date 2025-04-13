@@ -14,7 +14,7 @@ import java.util.List;
 public interface HouseMapper extends BaseMapper<HousePo> {
 
     /**
-     * 获取房源列表
+     * 管理端获取房源列表
      * @param query
      * @return
      */
@@ -22,7 +22,7 @@ public interface HouseMapper extends BaseMapper<HousePo> {
 
 
     /**
-     * 获取房源列表
+     * 客户端获取房源列表
      * @param query
      * @return
      */
@@ -34,5 +34,12 @@ public interface HouseMapper extends BaseMapper<HousePo> {
      * @return
      */
     HouseVo getHouseById(@Param("id") String id);
+
+    /**
+     * 获取房源详情
+     * @param id
+     * @return
+     */
+    HouseVo getHouseById(@Param("id") String id, @Param("userId") String userId);
 
 }

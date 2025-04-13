@@ -1,5 +1,6 @@
 package com.song.demo.common;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * 全局异常处理
  */
-//@Slf4j
+@Slf4j
 @RestControllerAdvice // RestController的增强类，可用于实现全局异常处理器
 public class RestExceptionHandler {
 
@@ -23,6 +24,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(Exception.class) // 统一处理某一类异常，从而减少代码重复率和复杂度，比如要获取自定义异常可以@ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 指定客户端收到的http状态码
     public ResultData<String> exception(Exception e) {
+        log.error("Error occurred: ", e);
         return ResultData.fail(ReturnCode.C500.getCode(), e.getMessage());
     }
 
@@ -34,6 +36,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(BizException.class)
     @ResponseStatus(HttpStatus.OK) // 指定客户端收到的http状态码
     public ResultData<String> bizException(Exception e) {
+        log.error("Biz Error: ", e);
         return ResultData.fail(ReturnCode.C400.getCode(), e.getMessage());
     }
 
@@ -45,6 +48,7 @@ public class RestExceptionHandler {
     @ResponseBody
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResultData exceptionHandler(MethodArgumentNotValidException e) {
+        log.error("Params Error: ", e);
         return ResultData.fail(ReturnCode.C400.getCode(), e.getBindingResult().getFieldError().getDefaultMessage());
     }
 }

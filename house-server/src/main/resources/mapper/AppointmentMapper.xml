@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.song.demo.mapper.AppointmentMapper">
+
+    <select id="getHouseDate" resultType="com.song.demo.entity.AppointmentPo">
+        select
+            *
+        from appointments
+        where house_id = #{id}
+          and status in ('PENDING', 'CONFIRMED')
+          and #{endOfDay} >= start_time  and end_time >= #{startOfDay}
+    </select>
+
+    <select id="queryAppointList" resultType="com.song.demo.vo.AppointmentVo">
+        select
+            ap.*,
+            h.title,
+            h.address,
+            u.username
+        from appointments ap
+            left join houses h on ap.house_id = h.house_id
+            left join users u on ap.user_id = u.user_id
+        <where>
+            <if test="query.title != null and query.title != ''">
+                and h.title like concat('%', #{query.title}, '%')
+            </if>
+            <if test="query.status != null">
+                and ap.status = #{query.status}
+            </if>
+            <if test="query.startTime != '' and query.startTime != null">
+                and ap.start_time &gt;= #{query.startTime}
+            </if>
+            <if test="query.endTime != '' and query.endTime != null">
+                and ap.end_time &lt;= #{query.endTime}
+            </if>
+        </where>
+        order by ap.create_time desc
+    </select>
+</mapper>

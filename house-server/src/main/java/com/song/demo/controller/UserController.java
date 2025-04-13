@@ -8,6 +8,7 @@ import com.song.demo.dto.UserDto;
 import com.song.demo.service.impl.UserServiceImpl;
 import com.song.demo.vo.LoginVo;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Objects;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 public class UserController {

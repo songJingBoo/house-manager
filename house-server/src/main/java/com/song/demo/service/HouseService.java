@@ -11,13 +11,11 @@ import com.song.demo.entity.CommentPo;
 import com.song.demo.entity.HouseFilterPo;
 import com.song.demo.entity.HousePo;
 import com.song.demo.entity.LikePo;
-import com.song.demo.mapper.CommentMapper;
-import com.song.demo.mapper.HouseFilterMapper;
-import com.song.demo.mapper.HouseMapper;
-import com.song.demo.mapper.LikeMapper;
+import com.song.demo.mapper.*;
 import com.song.demo.util.SecurityUtils;
 import com.song.demo.util.UUUtil;
 import com.song.demo.vo.CommentVo;
+import com.song.demo.vo.HouseImageVo;
 import com.song.demo.vo.HouseVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,9 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
 
     @Autowired
     private CommentMapper commentMapper;
+
+    @Autowired
+    private HouseImageMapper houseImageMapper;
 
     @Autowired
     private LikeMapper likeMapper;
@@ -100,7 +101,10 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
      * @return
      */
     public HouseVo getHouseDetail(String houseId) {
-        return houseMapper.getHouseById(houseId);
+        HouseVo houseVo = houseMapper.getHouseById(houseId, SecurityUtils.getUserId());
+        List<HouseImageVo> houseImageVos = houseImageMapper.queryImageList(houseId);
+        houseVo.setImages(houseImageVos);
+        return houseVo;
     }
 
     /**

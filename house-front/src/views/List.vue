@@ -181,7 +181,12 @@ async function getHouseList() {
       filter: filterChecked.value,
     })
     if (res.status === 200) {
-      houseList.value = res.data || []
+      houseList.value = (res.data || []).map(item => {
+        return {
+          ...item,
+          img: `${import.meta.env.VITE_FILE_DOMAIN}${item.imageCover}`
+        }
+      })
       total.value = res.data.length || 0
     } else {
       ElMessage.error(res.message)

@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("appointment")
+@TableName("appointments")
 public class AppointmentPo implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -24,8 +24,11 @@ public class AppointmentPo implements Serializable {
 
     private String houseId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")
-    private LocalDateTime appointmentTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", locale = "zh", timezone = "GMT+8")
+    private LocalDateTime startTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", locale = "zh", timezone = "GMT+8")
+    private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
     private AppointEn status;

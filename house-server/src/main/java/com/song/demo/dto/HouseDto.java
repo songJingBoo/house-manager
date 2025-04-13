@@ -66,5 +66,5 @@ public class HouseDto implements Serializable {
     private IntentionEn intention;
 
     @NotNull(message = "房屋图片不能为空")
-    private List<String> files;
+    private List<HouseImageDto> files;
 }
