@@ -13,3 +13,5 @@ house-front/dist
 
 house-server/.idea
 house-server/target
+house-server/uploads
+house-server/logs
