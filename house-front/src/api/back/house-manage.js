@@ -18,6 +18,24 @@ export function editHouse(data) {
   })
 }
 
+// 房产发布/下架
+export function changeStatus(params) {
+  return request({
+    url: '/back/changeStatus',
+    method: 'put',
+    params,
+  })
+}
+
+// 售出/租出房产
+export function dealHouse(data) {
+  return request({
+    url: '/back/dealHouse',
+    method: 'post',
+    data,
+  })
+}
+
 // 获取过滤项
 export function queryHouseFilter(params) {
   return request({

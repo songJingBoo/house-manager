@@ -4,18 +4,20 @@
     <div class="detail-wrap">
       <div class="image-wrap">
         <div class="image-preview">
-          <img v-if="currentUrl" :src="currentUrl" lazy />
+          <img v-if="houseDetail.imgList" :src="houseDetail.imgList[currentIndex].url" lazy />
         </div>
-        <div class="image-list">
-          <img v-for="url in houseDetail.imgList" :key="url" :src="url" lazy />
-          <ArrowLeftBold class="image-control left" />
-          <ArrowRightBold class="image-control right" />
+        <div class="image-list-wrap">
+          <div id="image-list" class="image-list">
+            <img v-for="img in houseDetail.imgList" :key="img.url" :src="img.url" lazy />
+          </div>
+          <ArrowLeftBold class="image-control left" @click="onSwitch(-1)" />
+          <ArrowRightBold class="image-control right" @click="onSwitch(1)" />
         </div>
       </div>
 
       <div class="house-overview">
         <div class="detail-price">
-          <div class="total-price">{{ houseDetail.expectPrice }}万</div>
+          <div class="total-price">{{ isFinished ? houseDetail.finalPrice : houseDetail.expectPrice }}万</div>
           <!-- <div class="unit-price">{{ houseDetail.unitPrice }}元/平</div> -->
         </div>
         <!-- <div class="house-prop">
@@ -25,11 +27,17 @@
         <div><MapLocation class="item-info__icon" />{{ houseDetail.address }}</div>
         <div><OfficeBuilding class="item-info__icon" />Layout：{{ getLayoutTxt(houseDetail.layout) }}</div>
         <div><Message class="item-info__icon" />Area: {{ houseDetail.area }} ㎡</div>
-        <div><Message class="item-info__icon" />Agent: {{ houseDetail.agent }} / {{ houseDetail.agentPhone || '--' }}</div>
+        <div><Message class="item-info__icon" />Agent: {{ houseDetail.agentName }} / {{ houseDetail.agentPhone || '--' }}</div>
         <div><Clock class="item-info__icon" />{{ houseDetail.updateTime }}</div>
-        <el-button v-if="!appintedTimeRange" type="primary" @click="openCreateAppointDialog">预约看房</el-button>
-        <el-button v-if="appintedTimeRange" type="success" @click="cancelAppointmentFn">取消预约</el-button>
-        <span v-if="appintedTimeRange" class="appointed-time">{{ appintedTimeRange }}</span>
+
+        <template v-if="!isFinished">
+          <el-button v-if="!appintedTimeRange" type="primary" @click="openCreateAppointDialog">预约看房</el-button>
+          <el-button v-if="appintedTimeRange" type="success" @click="cancelAppointmentFn">取消预约</el-button>
+          <span v-if="appintedTimeRange" class="appointed-time">{{ appintedTimeRange }}</span>
+        </template>
+        <template v-else>
+          <el-button type="primary" disabled>已完成交易</el-button>
+        </template>
       </div>
     </div>
 
@@ -99,11 +107,19 @@ const route = useRoute()
 const houseId = ref('')
 const houseDetail = ref({})
 const currentUrl = ref('') // 当前图片的url
+const currentIndex = ref(0) // 当前图片下标
 
 onMounted(() => {
   houseId.value = route.params.id
   getHouseDetail()
   getCommentList()
+})
+
+const isFinished = computed(() => {
+  return houseDetail.value.status === 'FINISHED'
+})
+const isRemoved = computed(() => {
+  return houseDetail.value.status === 'REMOVED'
 })
 
 // 是否已预约
@@ -165,13 +181,14 @@ async function getHouseDetail() {
     const res = await queryHouseDetail({ id: houseId.value })
     if (res.status === 200) {
       houseDetail.value = res.data || {}
-      houseDetail.value.imgList = (res.data.images || []).map((item) => {
-        const url = `${import.meta.env.VITE_FILE_DOMAIN}${item.imageUrl}`
-        if (item.isCover) {
-          currentUrl.value = url
+      const images = (res.data.images || []).map((item) => {
+        return {
+          ...item,
+          url: `${import.meta.env.VITE_FILE_DOMAIN}${item.imageUrl}`,
         }
-        return url
       })
+      images.sort((a, b) => b.isCover - a.isCover)
+      houseDetail.value.imgList = images
     } else {
       this.$message.error(res.message)
     }
@@ -281,6 +298,15 @@ function toggleReplyInput(comment) {
     showInput: true,
   }
 }
+
+/**
+ * 图片左右切换
+ */
+function onSwitch(dir) {
+  const imgListEl = document.getElementById('image-list')
+  currentIndex.value += dir
+  imgListEl.style.transform = `translateX(${-1 * currentIndex.value * 220}px)`
+}
 </script>
 
 <style lang="scss" scoped>
@@ -307,19 +333,23 @@ function toggleReplyInput(comment) {
           object-fit: cover;
         }
       }
-      .image-list {
+      .image-list-wrap {
+        overflow: hidden;
         width: 640px;
         height: 150px;
         margin-top: 12px;
-        overflow-y: auto;
         border: 1px solid #eee;
         position: relative;
-        img {
-          width: 220px;
-          height: 100%;
-          margin-right: 12px;
-          object-fit: cover;
-          cursor: pointer;
+        .image-list {
+          display: flex;
+          transition: all ease 0.3s;
+          img {
+            width: 220px;
+            height: 100%;
+            margin-right: 12px;
+            object-fit: cover;
+            cursor: pointer;
+          }
         }
         .image-control {
           width: 40px;

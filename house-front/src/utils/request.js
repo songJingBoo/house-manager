@@ -40,22 +40,11 @@ service.interceptors.response.use(
     return data
   },
   (error) => {
-    if (error.status === 403) {
-      ElMessageBox.alert('登录已过期', '过期', {
-        confirmButtonText: '去登录',
-        callback: () => {
-          store.removeToken()
-          store.removeUser()
-          router.push({ name: 'Login' })
-        },
-      })
-    } else {
-      ElMessage({
-        message: error.message,
-        type: 'error',
-        duration: 5000,
-      })
-    }
+    ElMessage({
+      message: error?.response?.data?.message || error.message,
+      type: 'error',
+      duration: 5000,
+    })
     return Promise.reject(error)
   },
 )

@@ -9,14 +9,21 @@ export function queryHouseList(data) {
     data,
   })
 }
-// 获取房屋列表
+// 获取热门房屋
+export function queryHotList(params) {
+  return request({
+    url: '/house/hot',
+    method: 'get',
+    params,
+  })
+}
+// 获取房屋过滤条件
 export function queryFilterConfig(params) {
-  // return request({
-  //   url: '/house/filter',
-  //   method: 'get',
-  //   params,
-  // })
-  return Res(filterConfig)
+  return request({
+    url: '/house/filter',
+    method: 'get',
+    params,
+  })
 }
 // 获取房屋详情
 export function queryHouseDetail(params) {

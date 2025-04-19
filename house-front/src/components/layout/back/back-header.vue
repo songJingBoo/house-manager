@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 import { UserFilled } from '@element-plus/icons-vue'
 import { logout } from '@/api/login'
+import ResetPasswordDialog from '@/components/reset-password-dialog.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useInfoStore } from '@/stores/userInfo'
 const store = useInfoStore()
@@ -18,6 +19,9 @@ function linkTo(pathname) {
   router.push({ name: pathname })
 }
 
+/**
+ * 登出
+ */
 async function logoutFn() {
   try {
     await logout()
@@ -27,6 +31,14 @@ async function logoutFn() {
     store.removeToken()
     linkTo('Login')
   }
+}
+
+/**
+ * 重置密码弹窗
+ */
+const resetPasswordRef = useTemplateRef('resetPasswordRef')
+function openResetPasswordDialog() {
+  resetPasswordRef.value.open()
 }
 
 const selected = (menu) => {
@@ -50,19 +62,23 @@ const selected = (menu) => {
           <div class="user-center__name">{{ store.user?.username }}</div>
           <template #dropdown>
             <el-dropdown-menu>
+              <el-dropdown-item @click="openResetPasswordDialog">Reset Password</el-dropdown-item>
               <el-dropdown-item @click="logoutFn">Logout</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </div>
     </div>
+
+    <!-- 重置密码 -->
+    <ResetPasswordDialog ref="resetPasswordRef" @submit="logoutFn" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .page-header {
   width: 100%;
-  height: 40px;
+  height: 50px;
   background: #101d37;
   z-index: 100;
 

@@ -4,8 +4,8 @@
       <el-form ref="auditFormRef" :model="formData" :rules="rules" label-width="auto" style="max-width: 600px">
         <el-form-item label="status" prop="status">
           <el-select v-model="formData.status" placeholder="Select">
-            <el-option label="available" value="AVAILABLE" />
-            <el-option label="unavailable" value="UNAVAILABLE" />
+            <el-option label="Approved" value="APPROVED" />
+            <el-option label="Rejected" value="REJECTED" />
           </el-select>
         </el-form-item>
         <el-form-item label="remarks" prop="remarks">

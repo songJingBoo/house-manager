@@ -1,42 +1,20 @@
 <template>
   <div class="house-list-page common-page">
-    <div class="house-filter">
-      <div class="filter-item" v-for="item in filterList" :key="item.code">
-        <div class="filter-item__name">{{ item.name }}</div>
-        <div class="filter-item__options">
-          <el-checkbox-group v-model="item.checked" @change="onFilterChange">
-            <el-checkbox v-for="(opt, i) in item.config" :key="i" :label="opt.label" :value="opt.value" />
-          </el-checkbox-group>
-        </div>
-      </div>
-    </div>
-
     <div class="house-content">
       <div class="house-content--left">
         <div class="house-sort">
-          <el-tabs v-model="sortType" class="theme" @tab-click="tabChange">
+          <el-tabs v-model="type" class="theme" @tab-click="onTabChange">
             <el-tab-pane v-for="item in tabList" :key="item.prop" :label="item.label" :name="item.prop">
               <template #label>
                 <span class="custom-tabs-label">
                   <span class="custom-tabs-label__text">{{ item.label }}</span>
-                  <el-icon v-if="sortType === item.prop" class="custom-tabs-label__icon">
-                    <SortUp v-if="sortDir === 'desc'" />
-                    <SortDown v-if="sortDir === 'asc'" />
-                  </el-icon>
                 </span>
               </template>
             </el-tab-pane>
           </el-tabs>
         </div>
 
-        <div class="house-total">
-          共找到 {{ total }} 套房源
-          <div class="view-finished">
-            <el-switch v-model="showFinish" size="small" active-text="View Finished" @change="getHouseList()" />
-          </div>
-        </div>
-
-        <div class="house-list" v-loading="houseLoading">
+        <div v-if="type !== 'appointments'" class="house-list" v-loading="houseLoading">
           <div
             v-for="item in houseList"
             :key="item.houseId"
@@ -72,161 +50,94 @@
             <!-- 关注按钮 -->
             <div class="like-btn" :class="{ 'is-liked': item.isLiked }" @click="likeHouseFn(item)"></div>
           </div>
-          <Empty v-if="!houseLoading && !houseList.length" paddingTop="80">暂未找到合适的房屋~</Empty>
+          <el-empty v-if="!houseLoading && !houseList.length" description="暂无房屋~" />
         </div>
-      </div>
 
-      <div class="house-content--right">
-        <div class="title">热门房源</div>
-        <div class="hot-list" v-loading="hotLoading">
-          <div class="hot-list__item" v-for="item in hotList" :key="item.houseId">
-            <img class="hot-img cursor" :src="item.img" @click="linkToDetail(item.houseId)" />
-            <div class="hot-info">
-              <div class="title" @click="linkToDetail(item.houseId)">
-                <div class="text-over" style="max-width: calc(100% - 40px)">{{ item.title }}</div>
-                <span v-if="item.status === 'PUBLISHED'" class="status status--available">{{ item.intention === 'RENT' ? '待租' : '待售' }}</span>
-                <span v-if="item.status === 'FINISHED' && item.intention === 'RENT'" class="status status--rented">已租</span>
-                <span v-if="item.status === 'FINISHED' && item.intention === 'SALE'" class="status status--sold">已售</span>
-              </div>
-            </div>
-          </div>
-          <el-empty v-if="!hotLoading && !hotList.length" class="hot-empty" :image-size="90" description="暂无热门房源~" />
+        <div v-if="type === 'appointments'" class="appoint-list">
+          <el-table v-loading="appointLoading" class="common-table__table" :data="appointList" style="width: 100%">
+            <el-table-column label="House Title" prop="title" width="180">
+              <template #default="scope">
+                <div class="text-over house-title" :title="scope.row.title" @click="linkToDetail(scope.row.houseId)">{{ scope.row.title || '--' }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="Time" prop="time" width="200">
+              <template #default="scope">
+                <div class="text-over">{{ scope.row.time || '--' }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="Agent" prop="agent" width="180">
+              <template #default="scope">
+                <div class="text-over">{{ scope.row.agent || '--' }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="Address" prop="address">
+              <template #default="scope">
+                <div class="text-over" :title="scope.row.address">{{ scope.row.address || '--' }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="Create Time" prop="createTime" width="180" />
+            <el-table-column label="operate" prop="Operate" fixed="right" width="180">
+              <template #default="scope">
+                <el-button v-if="scope.row.status === 'PENDING'" type="primary" small @click="openCreateAppointDialog(scope.row)">Edit</el-button>
+                <el-button v-if="scope.row.status === 'PENDING'" type="primary" small @click="cancelAppointmentFn(scope.row)">Cancel</el-button>
+                <el-button v-if="scope.row.status === 'CONFIRMED'" type="primary" small disabled>Confirmed</el-button>
+                <el-button v-if="scope.row.status === 'FINISHED'" type="primary" small disabled>Finished</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-if="!appointLoading && !appointList.length" description="暂无预约~" />
         </div>
       </div>
     </div>
+
+    <!-- 预约 -->
+    <AppointmentDialog ref="appointmentDialogRef" @submit="getHouseDetail" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { queryHouseList, queryHotList, likeHouse } from '@/api/house'
-import { queryHouseFilter } from '@/api/back/house-manage'
-import { ElMessage } from 'element-plus'
-import { MapLocation, OfficeBuilding, Message, Clock, SortUp, SortDown } from '@element-plus/icons-vue'
-import Empty from '@/components/Empty.vue'
+import { ref, onMounted, useTemplateRef } from 'vue'
+import { likeHouse } from '@/api/house'
+import { queryMyHouses, queryMyLikes, queryMyAppointment } from '@/api/my'
+import { cancelAppointment } from '@/api/house'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { MapLocation, OfficeBuilding, Message, Clock } from '@element-plus/icons-vue'
+import AppointmentDialog from '@/components/Appointment-dialog.vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
 onMounted(() => {
-  getFilterConfig()
-  getHouseList()
-  getHotList()
+  getMyHouses()
 })
 
 /**
  * tab配置
  */
 const tabList = ref([
-  { label: '最新发布', prop: 'create_time' },
-  { label: '总价', prop: 'expect_price' },
-  { label: '面积', prop: 'area' },
+  { label: 'My Houses', prop: 'houses' },
+  { label: 'My Likes', prop: 'likes' },
+  { label: 'My Appointments', prop: 'appointments' },
 ])
-const sortType = ref('create_time')
-const sortDir = ref('desc')
-const oldTab = ref('')
-function tabChange() {
-  if (oldTab.value === sortType.value) {
-    // 点击当前，则toggle
-    sortDir.value = sortDir.value === 'desc' ? 'asc' : 'desc'
-  } else {
-    sortDir.value = 'desc'
+const type = ref('houses')
+
+const onTabChange = () => {
+  if (type.value === 'houses' || type.value === 'likes') {
+    getMyHouses()
+  } else if (type.value === 'appointments') {
+    getMyAppointment()
   }
-  oldTab.value = sortType.value
-  getHouseList()
-}
-
-/**
- * 获取过滤项目[min, max)
- */
-const filterList = ref([])
-async function getFilterConfig() {
-  try {
-    const res = await queryHouseFilter()
-    if (res.status === 200) {
-      console.log(res)
-      filterList.value = handlerFilter(res.data)
-    } else {
-      ElMessage.error(res.message)
-    }
-  } catch (e) {
-    console.log(e)
-  }
-}
-
-/**
- * 选中过滤项
- */
-const filterChecked = ref([])
-function onFilterChange() {
-  filterChecked.value = filterList.value
-    .filter((item) => item.checked?.length > 0)
-    .map((item) => {
-      return {
-        code: item.code,
-        checked: item.checked,
-      }
-    })
-  getHouseList()
-}
-
-// 处理过滤项（计算单项label / value值）
-function handlerFilter(filterList) {
-  ;(filterList || []).forEach((item) => {
-    item.config = JSON.parse(item.config) || []
-    item.config.forEach((opt) => {
-      const { min, eql, max } = opt
-      // 固定值
-      if (eql !== undefined) {
-        opt.label = `${eql}${item.suffix}`
-        opt.value = { eql }
-        return
-      }
-
-      // 区间值 [min, max)
-      if (min !== undefined && max !== undefined) {
-        opt.label = `${min}-${max}${item.suffix}`
-        opt.value = { min, max }
-        return
-      }
-
-      // 半区间值 < max
-      if (min === undefined && max !== undefined) {
-        opt.label = `${max}${item.suffix}以下`
-        opt.value = { max }
-        return
-      }
-
-      // 半区间值 >= min
-      if (min !== undefined && max === undefined) {
-        opt.label = `${min}${item.suffix}以上`
-        opt.value = { min }
-        return
-      }
-    })
-  })
-  return filterList
-}
-
-function getLayoutTxt(layout) {
-  return `${layout.toLowerCase()}-bedroom`
 }
 
 /**
  * 获取房屋列表
  */
-const showFinish = ref(true) // 是否展示已售/租房屋
 const total = ref(0)
 const houseList = ref([])
 const houseLoading = ref(false)
-async function getHouseList() {
+async function getMyHouses() {
   try {
     houseLoading.value = true
-    const res = await queryHouseList({
-      sortDir: sortDir.value,
-      sortType: sortType.value,
-      showFinish: showFinish.value,
-      filter: filterChecked.value,
-    })
+    const res = await (type.value === 'houses' ? queryMyHouses() : queryMyLikes())
     if (res.status === 200) {
       houseList.value = (res.data || []).map((item) => {
         return {
@@ -246,30 +157,74 @@ async function getHouseList() {
 }
 
 /**
- * 获取热门房屋
+ * 获取我的预约
  */
-const hotLoading = ref(false)
-const hotList = ref([])
-async function getHotList() {
+const appointList = ref([])
+const appointLoading = ref(false)
+async function getMyAppointment() {
   try {
-    hotLoading.value = true
-    const res = await queryHotList()
+    appointLoading.value = true
+    const res = await queryMyAppointment()
     if (res.status === 200) {
-      hotList.value = (res.data || []).map((item) => {
+      appointList.value = (res.data || []).map((item) => {
         return {
           ...item,
-          img: `${import.meta.env.VITE_FILE_DOMAIN}${item.imageCover}`,
+          time: item.startTime ? `${item.startTime} ~ ${item.endTime.substr(11)}` : '--',
+          agent: item.agentName ? `${item.agentName} / ${item.agentPhone}` : '--',
         }
       })
-      total.value = res.data.length || 0
     } else {
       ElMessage.error(res.message)
     }
   } catch (e) {
     console.log(e)
   } finally {
-    hotLoading.value = false
+    appointLoading.value = false
   }
+}
+
+/**
+ * 取消预约
+ */
+const cancelLoading = ref(false)
+async function cancelAppointmentFn(appoint) {
+  const ok = await ElMessageBox.confirm('Confirm cancellation of appointment?', 'Warning', {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+  })
+    .then(() => 1)
+    .catch(() => 0)
+  if (!ok) return
+
+  try {
+    cancelLoading.value = true
+    const res = await cancelAppointment({
+      appointId: appoint.id,
+    })
+    if (res.status === 200) {
+      getMyAppointment()
+      ElMessage.success('Appointment cancelled successfully！')
+    } else {
+      ElMessage.error(res.message || 'Appointment cancelled failed')
+    }
+  } catch (e) {
+    console.log(e)
+  } finally {
+    cancelLoading.value = false
+  }
+}
+
+/**
+ * 修改预约
+ */
+const appointmentDialogRef = useTemplateRef('appointmentDialogRef')
+function openCreateAppointDialog(appoint) {
+  appointmentDialogRef.value.open(appoint.houseId, appoint)
+}
+
+function getLayoutTxt(layout) {
+  return `${layout.toLowerCase()}-bedroom`
 }
 
 /**
@@ -341,8 +296,7 @@ function linkToDetail(id) {
     display: flex;
     justify-content: space-between;
     .house-content--left {
-      width: calc(100% - 220px);
-      margin-bottom: 100px;
+      width: 100%;
       .house-list {
         .house-list__item {
           height: 234px;
@@ -451,7 +405,7 @@ function linkToDetail(id) {
     }
     .house-content--right {
       width: 182px;
-      padding-top: 40px;
+      padding-top: 28px;
       > .title {
         font-size: 20px;
         font-weight: bold;
@@ -459,21 +413,17 @@ function linkToDetail(id) {
       }
       .hot-list {
         .hot-list__item {
-          margin-bottom: 12px;
-          padding: 10px;
-          box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-          &:hover {
-            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
-          }
+          margin-bottom: 20px;
           .hot-img {
-            width: 164px;
-            height: 120px;
+            width: 182px;
+            height: 128px;
           }
           .hot-info {
             flex-grow: 1;
             height: 100%;
             .title {
               font-size: 12px;
+              margin-bottom: 12px;
               display: flex;
               align-items: center;
               justify-content: space-between;
@@ -527,8 +477,10 @@ function linkToDetail(id) {
   }
 }
 
-.hot-empty {
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+.house-title {
+  color: #f76900;
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>
 

@@ -1,7 +1,7 @@
 <template>
   <el-dialog v-model="visible" title="Filter Config" width="700" :before-close="cancel">
     <div class="common-dialog-content filter-dialog">
-      <div class="config-item" v-for="(item, index) in configList" :key="item.code">
+      <div class="config-item" v-for="item in configList" :key="item.code">
         <div class="config-item__name">
           <el-checkbox v-model="item.status" class="config-checkbox" :true-value="1" :false-value="0" />
           <el-input v-model="item.name" placeholder="请输入过滤项名称" clearable :disabled="!item.status" @clear="resetItemName(item)" style="width: 80px; margin-right: 10px" />
@@ -10,7 +10,7 @@
         <div class="config-item__content">
           <div v-for="(option, optionIndex) in item.config" :key="optionIndex" class="option-item">
             <el-input v-model="option.min" class="config-input" placeholder="最小值" clearable :disabled="!item.status" @clear="resetOptionMin(option)"></el-input>
-            <el-input v-model="option.eq" class="config-input" placeholder="等于" clearable :disabled="!item.status" @clear="resetOptionEq(option)"></el-input>
+            <el-input v-model="option.eql" class="config-input" placeholder="等于" clearable :disabled="!item.status" @clear="resetOptionEq(option)"></el-input>
             <el-input v-model="option.max" class="config-input" placeholder="最大值" clearable :disabled="!item.status" @clear="resetOptionMax(option)"></el-input>
             <el-button @click="deleteOption(item, optionIndex)" type="danger" :disabled="!item.status">删除</el-button>
           </div>
@@ -100,7 +100,7 @@ function resetOptionMax(option) {
   option.max = ''
 }
 function resetOptionEq(option) {
-  option.eq = ''
+  option.eql = ''
 }
 
 /**

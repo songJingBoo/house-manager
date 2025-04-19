@@ -131,13 +131,16 @@ const rules = reactive({
   expectPrice: [{ required: true, message: 'Please input your expected selling price' }],
   name: [{ required: true, message: 'Please input your name' }],
   phone: [{ required: true, message: 'Please input your phone' }],
+  files: [
+    { type: 'array', required: true, message: 'Please upload images', trigger: 'change' },
+    { type: 'array', min: 4, message: 'Minimum 4 images required', trigger: 'change' },
+  ]
   // remarks: [{ required: false }, { max: 100, message: 'Maximum input of 100 characters' }],
 })
 
 const submitLoading = ref(false)
 const publishFormRef = ref()
 const submitForm = async (formEl) => {
-  console.log(formData.value.files)
   if (!formEl) return
   formEl.validate(async (valid) => {
     if (!valid) return

@@ -30,3 +30,12 @@ export function logout(params) {
     params,
   })
 }
+// 重置密码
+export function resetPassword(data) {
+  return request({
+    url: '/user/resetPassword',
+    method: 'post',
+    data,
+  })
+}
+

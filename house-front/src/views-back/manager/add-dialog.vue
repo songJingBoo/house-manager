@@ -14,6 +14,7 @@
         </el-form-item>
         <el-form-item label="Role" prop="role">
           <el-select v-model="formData.role" placeholder="Select">
+            <el-option label="Customer" value="Customer" />
             <el-option label="Agent" value="Agent" />
             <el-option label="Reviewer" value="Reviewer" />
             <el-option label="Admin" value="Admin" />
@@ -40,6 +41,7 @@
 import { ref, reactive, computed } from 'vue'
 import { saveManager } from '@/api/back/manager'
 import { ElMessage } from 'element-plus'
+import md5 from 'md5'
 
 const emit = defineEmits(['submit'])
 const title = computed(() => {
@@ -93,7 +95,11 @@ async function submit(formEl) {
     if (!valid) return
     try {
       submitLoading.value = true
-      const res = await saveManager(formData)
+      const res = await saveManager({
+        ...formData,
+        password: formData.password ? md5(formData.password) : undefined,
+        newPassword: formData.newPassword ? md5(formData.newPassword) : undefined,
+      })
       if (res.status === 200) {
         emit('submit')
         cancel()

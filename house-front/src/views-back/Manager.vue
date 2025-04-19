@@ -22,10 +22,10 @@
         <el-table-column prop="role" label="Role" width="180" />
         <el-table-column prop="createTime" label="Create Time" />
         <el-table-column prop="updateTime" label="Update Time" />
-        <el-table-column prop="operate" label="Operate">
+        <el-table-column prop="operate" label="Operate" width="200">
           <template #default="scope">
             <el-button type="primary" small @click="addManagerFn(scope.row)">Edit</el-button>
-            <el-button type="primary" small @click="deleteManagerFn(scope.row)">Delete</el-button>
+            <el-button type="primary" small @click="deleteManagerFn(scope.row)" :disabled="scope.row.isDefault">Delete</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -89,7 +89,7 @@ function deleteManagerFn(data) {
   }).then(async () => {
     try {
       const res = await deleteManager({ id: data.id })
-      if (res.success) {
+      if (res.status === 200) {
         ElMessage.success('Delete successfully')
         getListFn()
       } else {

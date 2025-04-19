@@ -4,15 +4,12 @@
       <el-form ref="auditFormRef" :model="formData" :rules="rules" label-width="auto" style="max-width: 600px">
         <el-form-item label="status" prop="status">
           <el-select v-model="formData.status" placeholder="Select">
-            <el-option label="Pending" value="PENDING" />
-            <el-option label="Confirmed" value="CONFIRMED" />
-            <el-option label="Cancelled" value="CANCELLED" />
-            <el-option label="Finished" value="FINISHED" />
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="remarks" prop="remarks">
+        <!-- <el-form-item label="remarks" prop="remarks">
           <el-input v-model="formData.remarks" :rows="3" type="textarea" maxlength="100" show-word-limit />
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
     </div>
     <template #footer>
@@ -26,7 +23,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { auditRecord } from '@/api/back/audit'
+import { auditAppoint } from '@/api/back/appointment'
 import { ElMessage } from 'element-plus'
 
 const emit = defineEmits(['submit'])
@@ -40,11 +37,25 @@ const rules = reactive({
   remarks: [{ required: false }, { max: 1000 }],
 })
 
+// 预约记录状态不同，可变更的状态不同
+const statusMap = {
+  PENDING: [
+    { label: "Confirmed", value: "CONFIRMED" },
+    { label: "Cancelled", value: "CANCELLED" },
+  ],
+  CONFIRMED: [
+    { label: "Finished", value: "FINISHED" },
+    { label: "Cancelled", value: "CANCELLED" },
+  ]
+}
+
 // 打开弹窗
 const visible = defineModel(false)
+const statusOptions = ref([])
 function open(data) {
   visible.value = true
   if (data) {
+    statusOptions.value = statusMap[data.status]
     formData.id = data.id
   }
 }
@@ -63,13 +74,13 @@ async function submit(formEl) {
     if (!valid) return
     try {
       submitLoading.value = true
-      const res = await auditRecord(formData)
+      const res = await auditAppoint(formData)
       if (res.status === 200) {
         emit('submit')
         cancel()
-        ElMessage.success('Successfully audit')
+        ElMessage.success('Successfully')
       } else {
-        ElMessage.error(res.message || 'Audit failed')
+        ElMessage.error(res.message || 'Failed')
       }
     } catch (e) {
       console.log(e)

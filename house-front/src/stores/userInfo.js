@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { menus } from '@/config/role'
 
 export const useInfoStore = defineStore(
   'user-info',
@@ -13,8 +14,12 @@ export const useInfoStore = defineStore(
     }
 
     const user = ref({})
+    const menuList = ref({})
     function setUser(obj) {
       user.value = obj
+      menuList.value = obj.role ? menus.filter(menu => {
+        return menu.role.includes(obj.role)
+      }) : []
     }
     function removeUser() {
       user.value = {}
@@ -28,6 +33,7 @@ export const useInfoStore = defineStore(
       user,
       setUser,
       removeUser,
+      menuList,
     }
   },
   {

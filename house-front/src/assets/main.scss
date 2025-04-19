@@ -72,7 +72,37 @@
     background-color: var(--btn-hover) !important;
     border-color: var(--btn-hover) !important;
   }
+  &.is-disabled, 
+  &.is-disabled:hover {
+    background-color: var(--theme-color) !important;
+    border-color: var(--theme-color) !important;
+    opacity: 0.5;
+  }
 }
+
+.el-switch {
+  &.is-checked {
+    .el-switch__core {
+      background-color: var(--theme-color) !important;
+      border-color: var(--theme-color) !important;
+    }
+  }
+  .el-switch__label.is-active {
+    color: var(--theme-color) !important;
+  }
+}
+
+.el-checkbox {
+  .el-checkbox__input.is-checked .el-checkbox__inner {
+    background-color: var(--theme-color);
+    border-color: var(--theme-color);
+  }
+  .el-checkbox__inner:hover {
+    border-color: var(--theme-color);
+  }
+}
+
+
 
 // 客户端按钮
 .client-page-content {

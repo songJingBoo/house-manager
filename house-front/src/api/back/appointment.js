@@ -8,3 +8,12 @@ export function queryAppointmentList(data) {
     data,
   })
 }
+
+// 审核预约申请
+export function auditAppoint(data) {
+  return request({
+    url: '/back/appoint/auditAppoint',
+    method: 'post',
+    data,
+  })
+}

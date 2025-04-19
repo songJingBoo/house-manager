@@ -24,7 +24,7 @@ import Menu from './back-menu.vue'
   position: relative;
   .back-page-content {
     display: flex;
-    height: calc(100% - 40px);
+    height: calc(100% - 50px);
     .back-page-content__menu {
       flex-shrink: 0;
     }

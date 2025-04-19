@@ -4,8 +4,8 @@
       <el-tabs v-model="search.status" class="demo-tabs" @tab-click="getListFn()">
         <el-tab-pane label="Pending" name="PENDING" />
         <el-tab-pane label="Confirmed" name="CONFIRMED" />
-        <el-tab-pane label="Cancelled" name="CANCELLED" />
         <el-tab-pane label="Finished" name="FINISHED" />
+        <el-tab-pane label="Cancelled" name="CANCELLED" />
       </el-tabs>
       <el-form :inline="true" :model="search" class="demo-form-inline">
         <el-form-item label="Title" prop="title">
@@ -48,10 +48,10 @@
         <el-table-column label="Phone" prop="phone" width="180" />
         <el-table-column label="Creator" prop="username" width="180" />
         <el-table-column label="Create Time" prop="createTime" width="180" />
-        <el-table-column label="operate" prop="Operate" fixed="right" width="180">
+        <el-table-column v-if="search.status !== 'FINISHED' && search.status !== 'CANCELLED'" label="operate" prop="Operate" fixed="right" width="260">
           <template #default="scope">
-            <el-button type="primary" small @click="openEditAppointDialog(scope.row)">Edit</el-button>
-            <el-button type="primary" small @click="openAuditAppointDialog(scope.row)">Audit</el-button>
+            <el-button v-if="scope.row.status === 'PENDING'" type="primary" small @click="openEditAppointDialog(scope.row)">Edit</el-button>
+            <el-button type="primary" small @click="openAuditAppointDialog(scope.row)">Update Status</el-button>
           </template>
         </el-table-column>
       </el-table>

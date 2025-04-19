@@ -106,7 +106,7 @@ const formType = ref('login') // 表单类型
 const loginFormRef = useTemplateRef('loginFormRef')
 const loginForm = reactive({
   username: 'admin',
-  password: '',
+  password: 'zsxdc153',
   captcha: '123',
 })
 async function submitForm() {

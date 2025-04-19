@@ -3,8 +3,8 @@
     <template #header>
       <el-tabs v-model="search.status" class="demo-tabs" @tab-click="getListFn()">
         <el-tab-pane label="Pending" name="PENDING" />
-        <el-tab-pane label="Available" name="AVAILABLE" />
-        <el-tab-pane label="Unavailable" name="UNAVAILABLE" />
+        <el-tab-pane label="Approved" name="APPROVED" />
+        <el-tab-pane label="Rejected" name="REJECTED" />
       </el-tabs>
       <el-form :inline="true" :model="search" class="demo-form-inline">
         <el-form-item label="City" prop="city">
@@ -34,7 +34,7 @@
         <el-table-column label="Name" prop="name" width="180" />
         <el-table-column label="Phone" prop="phone" width="180" />
         <el-table-column label="Publish Time" prop="createTime" width="180" />
-        <el-table-column label="operate" prop="Operate" fixed="right" width="180">
+        <el-table-column v-if="search.status === 'PENDING'" label="operate" prop="Operate" fixed="right" width="180">
           <template #default="scope">
             <el-button type="primary" small @click="editFn(scope.row)">Edit</el-button>
             <el-button type="primary" small @click="auditFn(scope.row)">Audit</el-button>
