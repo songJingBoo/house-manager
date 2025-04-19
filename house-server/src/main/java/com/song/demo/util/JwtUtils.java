@@ -14,9 +14,9 @@ import java.util.Map;
 @Slf4j
 public class JwtUtils {
     /**
-     * 过期时间 30分钟
+     * 过期时间 24小时
      */
-    private static final long EXPIRE_TIME = 30 * 60 * 1000;
+    private static final long EXPIRE_TIME = 24 * 60 * 60 * 1000;
 
     /**
      * 密钥

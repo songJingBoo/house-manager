@@ -15,6 +15,7 @@ import com.song.demo.util.UUUtil;
 import com.song.demo.vo.LoginVo;
 import com.song.demo.vo.UserVo;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +43,8 @@ public class UserBackController {
     private PasswordEncoder passwordEncoder;
 
 
-    @ApiOperation("获取用户列表")
+    @ApiOperation("获取客户列表")
+    @Secured("ROLE_Admin")
     @GetMapping("/user/list")
     public List<UserVo> getUserList(@RequestParam("keyword") String keyword) {
         List<UserPo> userPos = userMapper.selectList(Wrappers.<UserPo>lambdaQuery()
@@ -59,6 +61,7 @@ public class UserBackController {
     }
 
     @ApiOperation("获取管理员列表")
+    @Secured("ROLE_Admin")
     @GetMapping("/manager/list")
     public List<UserVo> getManagerList(@RequestParam("keyword") String keyword) {
         List<UserPo> userPos = userMapper.selectList(Wrappers.<UserPo>lambdaQuery()
@@ -75,6 +78,7 @@ public class UserBackController {
     }
 
     @ApiOperation("新增/修改管理员")
+    @Secured("ROLE_Admin")
     @PostMapping("/manager/save")
     public void saveManager(@RequestBody @Valid ManagerDto dto) {
         // 重名重手机号校验
@@ -116,23 +120,14 @@ public class UserBackController {
         }
     }
 
-    @ApiOperation("注册")
-    @PostMapping("/permit/register")
-    public boolean register(@RequestBody @Valid UserDto userDto) {
-        return userServiceImpl.register(userDto);
-    }
-
-    @ApiOperation("登出")
-    @GetMapping("/logout")
-    public boolean logout() {
-        return userServiceImpl.logout();
-    }
-
-    @ApiOperation("获取用户详情")
-    @Secured("ROLE_abc")
-    @GetMapping("/detail")
-    public String detail() {
-        throw new BizException("hahha");
-//        return "detail";
+    @ApiOperation("删除管理员")
+    @Secured("ROLE_Admin")
+    @DeleteMapping("/manager/delete")
+    public void deleteManager(@RequestParam("id") Long id) {
+        UserPo userPo = userMapper.selectById(id);
+        if (userPo.getIsDefault() == 1) {
+            throw new BizException("系统预置用户不可删除！");
+        }
+        userMapper.deleteById(id);
     }
 }

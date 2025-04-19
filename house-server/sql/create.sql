@@ -31,10 +31,12 @@ CREATE TABLE `houses` (
     `community` varchar(64) NOT NULL COMMENT '小区',
     `address` varchar(128) NOT NULL COMMENT '详细地址',
     `expect_price` DECIMAL(10, 2) NOT NULL COMMENT '期望售价（万元）',
+    `final_price` DECIMAL(10, 2) DEFAULT NULL COMMENT '最终售价（万元）',
     `name` varchar(11) NOT NULL COMMENT '联系人',
     `phone` varchar(11) NOT NULL COMMENT '联系电话',
     `intention` ENUM('RENT', 'SALE') NOT NULL COMMENT '意愿类型（出租、出售）',
-    `status` ENUM('PENDING', 'AVAILABLE', 'RENTED', 'SOLD', 'UNAVAILABLE') DEFAULT 'PENDING',
+    `audit_status` ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    `status` ENUM('UNPUBLISHED', 'PUBLISHED', 'FINISHED', 'REMOVED') DEFAULT 'UNPUBLISHED',
     `agent` varchar(16) DEFAULT NULL COMMENT '经纪人',
     `creator` varchar(16) NOT NULL,
     `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -67,10 +69,10 @@ CREATE TABLE house_filter (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='房源过滤配置表';
 # 预置过滤项
 insert into house_filter (name, code, config, suffix) values
-('单价', 'unitPrice', '[{"max":5000},{"min":5000,"max":8000},{"min":8000,"max":100000},{"min":10000}]', '元/㎡'),
-('总价', 'totalPrice', '[{"max":40},{"min":40,"max":60},{"min":60,"max":80},{"min":80}]', '元'),
+('单价', 'unit_price', '[{"max":5000},{"min":5000,"max":8000},{"min":8000,"max":100000},{"min":10000}]', '元/㎡'),
+('总价', 'expect_price', '[{"max":40},{"min":40,"max":60},{"min":60,"max":80},{"min":80}]', '万元'),
 ('面积', 'area', '[{"max":50},{"min":50,"max":70},{"min":70,"max":90},{"min":90}]', '㎡'),
-('户型', 'layout', '[{"eq":1},{"eq":2},{"eq":3},{"eq":4},{"min":5}]', '居');
+('户型', 'layout', '[{"eql":1},{"eql":2},{"eql":3},{"eql":4},{"min":5}]', '居');
 
 CREATE TABLE appointments (
     id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -83,13 +85,7 @@ CREATE TABLE appointments (
     unique_key VARCHAR(255) GENERATED ALWAYS AS (
         CASE
             WHEN status in ('PENDING', 'CONFIRMED')
-                THEN CONCAT(
-                    house_id,
-                    '_',
-                    DATE_FORMAT(start_time, '%Y%m%d%H%i'),
-                    '_',
-                    DATE_FORMAT(end_time, '%Y%m%d%H%i')
-                )
+                THEN CONCAT(house_id, '_', DATE_FORMAT(start_time, '%Y%m%d%H%i'), '_', DATE_FORMAT(end_time, '%Y%m%d%H%i'))
             ELSE NULL
         END
     ) VIRTUAL,
@@ -110,17 +106,6 @@ CREATE TABLE comments (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='评论表';
 
-# CREATE TABLE replies (
-#     reply_id int AUTO_INCREMENT PRIMARY KEY,
-#     comment_id int NOT NULL,
-#     user_id varchar(16) NOT NULL,
-#     content TEXT NOT NULL,
-#     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-#     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-#     FOREIGN KEY (comment_id) REFERENCES comments(id),
-#     FOREIGN KEY (user_id) REFERENCES users(user_id)
-# ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='回复评论表';
-
 CREATE TABLE likes (
    id bigint(8) AUTO_INCREMENT PRIMARY KEY,
    house_id varchar(16) NOT NULL,
@@ -130,3 +115,19 @@ CREATE TABLE likes (
    FOREIGN KEY (user_id) REFERENCES users(user_id),
    UNIQUE (house_id, user_id) -- 确保一个用户只能对一个房屋关注一次
 )ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='关注表';
+
+CREATE TABLE `messages` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+    `user_id` varchar(16) NOT NULL,
+    `house_id` varchar(16) NOT NULL COMMENT '关联房源ID',
+    `title` varchar(100) NOT NULL COMMENT '消息标题',
+    `content` varchar(512) NOT NULL COMMENT '消息内容',
+    `is_read` tinyint NOT NULL DEFAULT '0' COMMENT '是否已读(0:未读,1:已读)',
+    `creator` varchar(16) NOT NULL,
+    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_is_read` (`is_read`),
+    KEY `idx_related_property` (`house_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站内信表';

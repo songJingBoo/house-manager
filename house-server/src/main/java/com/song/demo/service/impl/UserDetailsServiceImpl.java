@@ -39,6 +39,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 username,
                 userPo.getRole(),
                 password,
-                AuthorityUtils.commaSeparatedStringToAuthorityList("admin,normal,ROLE_abc"));
+                AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_" + userPo.getRole()));
     }
 }

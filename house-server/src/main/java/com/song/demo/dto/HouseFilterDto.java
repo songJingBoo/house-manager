@@ -1,36 +1,29 @@
 package com.song.demo.dto;
 
-import com.song.demo.enums.IntentionEn;
-import com.song.demo.enums.LayoutEn;
 import lombok.Data;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.util.List;
 
 /**
- * 房源 操作
+ * 客户端 房屋多条件过滤
  */
 @Data
 public class HouseFilterDto implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    @NotNull(message = "过滤项code不能为空")
     private String code;
 
-    @NotNull(message = "过滤项名称不能为空")
-    private String name;
+    private List<condition> checked;
 
-    @NotNull(message = "过滤项状态不能为空")
-    private Integer status;
+    @Data
+    public static class condition implements Serializable {
 
-    @NotEmpty(message = "过滤项配置不能为空")
-    private String config;
+        private Integer min;
 
-    @NotEmpty(message = "过滤项单位不能为空")
-    private String suffix;
+        private Integer eql;
+
+        private Integer max;
+    }
 }

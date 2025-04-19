@@ -1,12 +1,9 @@
 package com.song.demo.dto.query;
 
+import com.song.demo.dto.HouseFilterConfigDto;
 import com.song.demo.dto.HouseFilterDto;
-import com.song.demo.enums.IntentionEn;
-import com.song.demo.enums.LayoutEn;
 import lombok.Data;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import java.util.List;
 
 /**
@@ -19,7 +16,11 @@ public class HouseQueryDto {
 
     private String sortType;
 
+    private String sortDir;
+
     private String userId;
+
+    private Boolean showFinish;
 
     private List<HouseFilterDto> filter;
 }

@@ -28,6 +28,9 @@ public class HousePublishDto implements Serializable {
     @NotNull(message = "面积不能为空")
     private BigDecimal area;
 
+    @NotNull(message = "楼层不能为空")
+    private Integer floor;
+
     @NotEmpty(message = "城市不能为空")
     private String city;
 
@@ -50,4 +53,7 @@ public class HousePublishDto implements Serializable {
     @NotNull(message = "交易类型不能为空")
     @Enumerated(EnumType.STRING)
     private IntentionEn intention;
+
+    @NotNull(message = "房屋图片不能为空")
+    private List<HouseImageDto> files;
 }

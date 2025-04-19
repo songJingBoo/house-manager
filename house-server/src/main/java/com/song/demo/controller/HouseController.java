@@ -7,6 +7,10 @@ import com.song.demo.dto.LoginDto;
 import com.song.demo.dto.query.HouseBackQueryDto;
 import com.song.demo.dto.query.HouseQueryDto;
 import com.song.demo.entity.HouseFilterPo;
+import com.song.demo.mapper.CommentMapper;
+import com.song.demo.mapper.HouseImageMapper;
+import com.song.demo.mapper.HouseMapper;
+import com.song.demo.mapper.LikeMapper;
 import com.song.demo.service.HouseService;
 import com.song.demo.vo.CommentVo;
 import com.song.demo.vo.HouseVo;
@@ -24,16 +28,31 @@ public class HouseController {
     @Autowired
     private HouseService houseService;
 
+    @Autowired
+    private HouseMapper houseMapper;
+
+    @Autowired
+    private CommentMapper commentMapper;
+
+    @Autowired
+    private LikeMapper likeMapper;
+
     @ApiOperation("获取房源列表")
     @PostMapping("/list")
     public List<HouseVo> getHouse(@RequestBody @Valid HouseQueryDto query) {
         return houseService.getHouse(query);
     }
 
+    @ApiOperation("获取热门房源列表")
+    @GetMapping("/hot")
+    public List<HouseVo> getHotHouse() {
+        return houseMapper.queryHotHouse();
+    }
+
     @ApiOperation("发布房源")
     @PostMapping("/create")
-    public Boolean createHouse(@RequestBody @Valid HousePublishDto houseDto) {
-        return houseService.createHouse(houseDto);
+    public void createHouse(@RequestBody @Valid HousePublishDto houseDto) {
+        houseService.createHouse(houseDto);
     }
 
     @ApiOperation("修改房源")
@@ -46,12 +65,6 @@ public class HouseController {
     @GetMapping("/detail")
     public HouseVo getHouseDetail(@RequestParam String id) {
         return houseService.getHouseDetail(id);
-    }
-
-    @ApiOperation("修改房源状态")
-    @PutMapping("/status")
-    public void changeStatus(@RequestBody @Valid LoginDto LoginDto) {
-
     }
 
     @ApiOperation("获取过滤条件配置")

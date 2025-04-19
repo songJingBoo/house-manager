@@ -1,9 +1,8 @@
 package com.song.demo.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.song.demo.dto.HouseFilterDto;
+import com.song.demo.dto.HouseFilterConfigDto;
 import com.song.demo.entity.HouseFilterPo;
-import com.song.demo.entity.HouseImagePo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
@@ -17,5 +16,5 @@ public interface HouseFilterMapper extends BaseMapper<HouseFilterPo> {
      * @return
      */
     @Update("update house_filter set status = ${dto.status}, config = #{dto.config} where id = ${dto.id}")
-    int saveFilterConfig(@Param("dto") HouseFilterDto dto);
+    int saveFilterConfig(@Param("dto") HouseFilterConfigDto dto);
 }

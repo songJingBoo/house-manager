@@ -5,6 +5,7 @@ import cn.hutool.captcha.ShearCaptcha;
 import com.song.demo.common.BizException;
 import com.song.demo.dto.LoginDto;
 import com.song.demo.dto.UserDto;
+import com.song.demo.dto.resetPasswordDto;
 import com.song.demo.service.impl.UserServiceImpl;
 import com.song.demo.vo.LoginVo;
 import io.swagger.annotations.ApiOperation;
@@ -40,10 +41,10 @@ public class UserController {
     @ApiOperation("登录")
     @PostMapping("/permit/login")
     public LoginVo login(HttpServletRequest request, @RequestBody @Valid LoginDto LoginDto) {
-        String captchaCode = (String) request.getSession().getAttribute("captchaCode");
-        if (!Objects.equals(captchaCode, LoginDto.getCaptcha())) {
-            throw new BizException("验证码错误");
-        }
+//        String captchaCode = (String) request.getSession().getAttribute("captchaCode");
+//        if (!Objects.equals(captchaCode, LoginDto.getCaptcha())) {
+//            throw new BizException("验证码错误");
+//        }
         return userServiceImpl.login(LoginDto);
     }
 
@@ -59,11 +60,9 @@ public class UserController {
         return userServiceImpl.logout();
     }
 
-    @ApiOperation("获取用户详情")
-    @Secured("ROLE_abc")
-    @GetMapping("/detail")
-    public String detail() {
-        throw new BizException("hahha");
-//        return "detail";
+    @ApiOperation("修改密码")
+    @PostMapping("/resetPassword")
+    public void resetPassword(@RequestBody @Valid resetPasswordDto resetPasswordDto) {
+        userServiceImpl.resetPassword(resetPasswordDto);
     }
 }

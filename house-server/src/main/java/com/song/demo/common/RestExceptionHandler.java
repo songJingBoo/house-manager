@@ -21,12 +21,12 @@ public class RestExceptionHandler {
      * @param e
      * @return ResultData
      */
-    @ExceptionHandler(Exception.class) // 统一处理某一类异常，从而减少代码重复率和复杂度，比如要获取自定义异常可以@ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 指定客户端收到的http状态码
-    public ResultData<String> exception(Exception e) {
-        log.error("Error occurred: ", e);
-        return ResultData.fail(ReturnCode.C500.getCode(), e.getMessage());
-    }
+//    @ExceptionHandler(Exception.class) // 统一处理某一类异常，从而减少代码重复率和复杂度，比如要获取自定义异常可以@ExceptionHandler(BusinessException.class)
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 指定客户端收到的http状态码
+//    public ResultData<String> exception(Exception e) {
+//        log.error("Error occurred: ", e);
+//        return ResultData.fail(ReturnCode.C500.getCode(), e.getMessage());
+//    }
 
     /**
      * 处理自定义业务异常

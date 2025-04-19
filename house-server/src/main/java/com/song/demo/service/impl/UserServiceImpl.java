@@ -1,8 +1,10 @@
 package com.song.demo.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.song.demo.common.BizException;
+import com.song.demo.dto.resetPasswordDto;
 import com.song.demo.entity.UserPo;
 import com.song.demo.enums.RoleEn;
 import com.song.demo.mapper.UserMapper;
@@ -89,7 +91,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> {
         return result == 1;
     }
 
-
     /**
      * 登出
      * @return
@@ -97,5 +98,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo> {
     public boolean logout() {
         redisService.delete(SecurityUtils.getUsername());
         return true;
+    }
+
+    /**
+     * 修改密码
+     * @return
+     */
+    public void resetPassword(resetPasswordDto resetPasswordDto) {
+        UserPo userPo = userMapper.selectOne(Wrappers.<UserPo>lambdaQuery().eq(UserPo::getUserId, SecurityUtils.getUserId()));
+        if (userPo == null) {
+            throw new BizException("用户不存在");
+        }
+
+        boolean match = passwordEncoder.matches(resetPasswordDto.getPassword(), userPo.getPassword());
+        if (!match) {
+            throw new BizException("旧密码错误");
+        }
+
+        userPo.setPassword(passwordEncoder.encode(resetPasswordDto.getNewPassword()));
+        userMapper.updateById(userPo);
     }
 }

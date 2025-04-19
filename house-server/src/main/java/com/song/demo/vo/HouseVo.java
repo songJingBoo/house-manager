@@ -3,6 +3,7 @@ package com.song.demo.vo;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.song.demo.entity.HouseImagePo;
+import com.song.demo.enums.HouseAuditStatusEn;
 import com.song.demo.enums.HouseStatusEn;
 import com.song.demo.enums.IntentionEn;
 import com.song.demo.enums.LayoutEn;
@@ -40,6 +41,7 @@ public class HouseVo implements Serializable {
     private String address;
 
     private BigDecimal expectPrice;
+    private BigDecimal finalPrice;
 
     private String name;
 
@@ -50,6 +52,9 @@ public class HouseVo implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private HouseStatusEn status;
+
+    @Enumerated(EnumType.STRING)
+    private HouseAuditStatusEn auditStatus;
 
     private String agent;
 

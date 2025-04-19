@@ -37,3 +37,8 @@ file:
   upload:
     base-dir: uploads/
     access-path: /files/**
+
+logging:
+  level:
+    com.song.demo.mapper: DEBUG  # 打印sql
+    org.mybatis.spring: DEBUG  # 打印sql

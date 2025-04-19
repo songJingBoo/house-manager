@@ -5,12 +5,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.song.demo.common.BizException;
 import com.song.demo.dto.*;
-import com.song.demo.dto.query.HouseBackQueryDto;
 import com.song.demo.dto.query.HouseQueryDto;
-import com.song.demo.entity.CommentPo;
-import com.song.demo.entity.HouseFilterPo;
-import com.song.demo.entity.HousePo;
-import com.song.demo.entity.LikePo;
+import com.song.demo.entity.*;
 import com.song.demo.mapper.*;
 import com.song.demo.util.SecurityUtils;
 import com.song.demo.util.UUUtil;
@@ -20,6 +16,7 @@ import com.song.demo.vo.HouseVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -56,13 +53,24 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
      * @param houseDto
      * @return
      */
-    public Boolean createHouse(HousePublishDto houseDto) {
+    @Transactional
+    public void createHouse(HousePublishDto houseDto) {
         HousePo housePo = BeanUtil.copyProperties(houseDto, HousePo.class);
         housePo.setUserId(SecurityUtils.getUserId());
         housePo.setHouseId(UUUtil.getId());
         housePo.setCreator(SecurityUtils.getUserId());
-        int count = houseMapper.insert(housePo);
-        return count == 1;
+        houseMapper.insert(housePo);
+
+        List<HouseImageDto> houseImageDtos = houseDto.getFiles();
+        if (houseImageDtos != null && houseImageDtos.size() > 0) {
+            houseImageDtos.forEach(houseImageDto -> {
+                HouseImagePo imagePo = new HouseImagePo();
+                imagePo.setHouseId(housePo.getHouseId());
+                imagePo.setImageUrl(houseImageDto.getPath());
+                imagePo.setIsCover(houseImageDto.getIsCover());
+                houseImageMapper.insert(imagePo);
+            });
+        }
     }
 
     /**
@@ -88,7 +96,7 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
             throw new BizException("房屋不存在");
         }
 
-        housePo.setStatus(auditDto.getStatus());
+        housePo.setAuditStatus(auditDto.getStatus());
         int count = houseMapper.updateById(housePo);
         if (count == 0) {
             throw new BizException("房屋审核失败");
@@ -117,11 +125,11 @@ public class HouseService extends ServiceImpl<HouseMapper, HousePo> {
 
     /**
      * 保存过滤条件配置
-     * @param houseFilterDto
+     * @param houseFilterConfigDto
      * @return
      */
-    public Boolean saveFilterConfig(HouseFilterDto houseFilterDto) {
-        int count = houseFilterMapper.saveFilterConfig(houseFilterDto);
+    public Boolean saveFilterConfig(HouseFilterConfigDto houseFilterConfigDto) {
+        int count = houseFilterMapper.saveFilterConfig(houseFilterConfigDto);
         return count == 1;
     }
 

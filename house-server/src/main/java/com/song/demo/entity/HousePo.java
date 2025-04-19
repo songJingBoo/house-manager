@@ -3,10 +3,7 @@ package com.song.demo.entity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.song.demo.enums.HouseStatusEn;
-import com.song.demo.enums.IntentionEn;
-import com.song.demo.enums.LayoutEn;
-import com.song.demo.enums.RoleEn;
+import com.song.demo.enums.*;
 import lombok.Data;
 
 import javax.persistence.EnumType;
@@ -46,6 +43,8 @@ public class HousePo implements Serializable {
 
     private BigDecimal expectPrice;
 
+    private BigDecimal finalPrice;
+
     private String name;
 
     private String phone;
@@ -55,6 +54,11 @@ public class HousePo implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private HouseStatusEn status;
+
+    @Enumerated(EnumType.STRING)
+    private HouseAuditStatusEn auditStatus;
+
+    private String agent;
 
     private String creator;
 

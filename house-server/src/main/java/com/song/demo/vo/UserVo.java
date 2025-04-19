@@ -13,6 +13,7 @@ public class UserVo {
     private String userId;
     private String username;
     private String role;
+    private Integer isDefault;
     private String phone;
     private String creator;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")

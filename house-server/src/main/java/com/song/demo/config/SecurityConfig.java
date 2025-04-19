@@ -39,14 +39,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 认证失败处理类
                 .exceptionHandling()
                 .accessDeniedHandler(restfulAccessDeniedHandler()) // 403
-                .authenticationEntryPoint(restAuthenticationEntryPoint()) // 777
+                .authenticationEntryPoint(restAuthenticationEntryPoint()) // 666
                 .and()
 
                 // 过滤请求
                 .authorizeRequests()
                 .antMatchers("/files/**").permitAll() // 静态资源访问路径
                 .antMatchers("/permit/**", "/**/permit/**").permitAll()
-//                .antMatchers("/user-api/detail").permitAll()
 //                .antMatchers("/user-api/detail").hasAuthority("admin")
 //                .antMatchers("/user-api/detail").hasRole("abc")
                 .anyRequest().authenticated()

@@ -22,4 +22,6 @@ public interface AppointmentMapper extends BaseMapper<AppointmentPo> {
                                      @Param("endOfDay") LocalDateTime endOfDay);
 
     List<AppointmentVo> queryAppointList(@Param("query") AppointmentQueryDto query);
+
+    List<AppointmentVo> queryMyAppointments(@Param("userId") String userId);
 }

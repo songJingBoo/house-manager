@@ -15,7 +15,8 @@ public class AppointmentVo {
 
     private String userId;
     private String username;
-    private String phone;
+    private String agentName;
+    private String agentPhone;
 
     private String houseId;
     private String title;
